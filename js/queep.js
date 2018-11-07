@@ -161,8 +161,8 @@
     var i, len, pair;
     for (i = 0, len = acronym_words.length; i < len; i++) {
       pair = acronym_words[i];
-      add_tooltip_custom('#' + pair[0] + pair[1], "Change to:" + pair[1]);
-      add_tooltip_custom('#' + pair[1] + pair[0], "Change to:" + pair[0]);
+      add_tooltip_custom('#' + pair[0] + pair[1], "Change to: " + pair[1]);
+      add_tooltip_custom('#' + pair[1] + pair[0], "Change to: " + pair[0]);
     }
   };
 
