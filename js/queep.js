@@ -105,7 +105,6 @@
   acronym_and_word_check = function(text_content, word_acro_array) {
     var acronym_words, alt_word, i, j, len, len1, lower_case_tokens, ref, text_array, word;
     text_array = text_content.split(" ");
-    // console.log clean_text
     acronym_words = [];
     lower_case_tokens = [];
     text_array.forEach(function(ele){
@@ -167,15 +166,14 @@
   };
 
   highlight_valid_acros = function(text_content, word_acro_array) {
-    var acronym_array, i, len, ref, text_array, word;
+    var acro, acronym_array, i, len, lower_word, regex, text_array;
     acronym_array = Object.keys(word_acro_array);
     text_array = text_content.split(" ");
-    for (i = 0, len = text_array.length; i < len; i++) {
-      word = text_array[i];
-      if (ref = word.toLowerCase(), indexOf.call(acronym_array, ref) >= 0) {
-        console.log("ST8");
-        text_content = text_content.replace(RegExp(`^${word}|[ ]${word}(?=([ ]|$))`, "gi"), '<span id="' + word + '" class="acro_green">$&</span>');
-      }
+    for (i = 0, len = acronym_array.length; i < len; i++) {
+      acro = acronym_array[i];
+      lower_word = acro.toLowerCase();
+      regex = RegExp(`^${acro}|[ ]${acro}(?=([ \\;\\!\\-]|$))`, "gi");
+      text_content = text_content.replace(regex, ' <span id="' + acro + '" class="acro_green">' + acro + '</span>');
     }
     return text_content;
   };

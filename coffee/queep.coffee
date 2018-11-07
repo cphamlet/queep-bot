@@ -81,7 +81,6 @@ spell_check = (text_content,dict_array) ->
 
 acronym_and_word_check = (text_content,word_acro_array) ->
 	text_array = text_content.split(" ")
-	# console.log clean_text
 	acronym_words = []
 
 	lower_case_tokens = []
@@ -133,12 +132,11 @@ add_tooltips = (acronym_words) ->
 highlight_valid_acros = (text_content, word_acro_array) ->
 	acronym_array = Object.keys word_acro_array
 	text_array = text_content.split(" ")
-	for word in text_array
-
-		if word.toLowerCase() in acronym_array
-			console.log "ST8"
-			text_content = text_content.replace ///^#{word}|[\ ]#{word}(?=([\ ]|$))///gi,'<span id="'+word+'" class="acro_green">$&</span>'
-			
+	for acro in acronym_array
+		lower_word = acro.toLowerCase()
+		regex = ///^#{acro}|[\ ]#{acro}(?=([\ \;\!\-]|$))///gi
+		text_content = text_content.replace(regex,' <span id="'+acro+'" class="acro_green">'+acro+'</span>')
+		
 	return text_content
 
 queep= ->
@@ -149,10 +147,10 @@ queep= ->
 	# approved_acronym_check(text_content)
 	# duplicate_acronyms = duplicate_acronym_check(text_content)
 	# text_content = highlight_dupes(duplicate_acronyms, text_content)
-
 	acronym_words = acronym_and_word_check(text_content,word_acro_data)
 	text_content = highlight_word_acro_pairs(text_content,acronym_words)
 	text_content = highlight_valid_acros(text_content, word_acro_data)
+
 	# typos = spell_check(text_content,dict_array)
 	# text_content = highlight_typos(typos,text_content)
 	# $('#text_content').focus()
