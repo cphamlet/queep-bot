@@ -126,8 +126,8 @@ add_tooltip_custom = (selector, msg) ->
 
 add_tooltips = (acronym_words) ->
 	for pair in acronym_words
-		add_tooltip_custom('#'+pair[0]+pair[1],pair[1])
-		add_tooltip_custom('#'+pair[1]+pair[0],pair[0])
+		add_tooltip_custom('#'+pair[0]+pair[1],"Change to:" +pair[1])
+		add_tooltip_custom('#'+pair[1]+pair[0],"Change to:" +pair[0])
 	return
 
 highlight_valid_acros = (text_content, word_acro_array) ->
