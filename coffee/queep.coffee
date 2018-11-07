@@ -104,6 +104,7 @@ acronym_and_word_check = (text_content,word_acro_array) ->
 # this function will detect multi-words (e.g. Air Force)
 #
 highlight_word_acro_pairs = (text_content,word_acro_array) ->
+	tooltipped_words = [];
 	for acronym in Object.keys word_acro_array
 		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
 		if regex_acro.test(text_content)
@@ -114,9 +115,11 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 					acro_flag = false
 					text_content = text_content.replace regex_acro, '<span id="'+acronym+spelled_word+'" class="acro_pair">$&</span>'
 					text_content = text_content.replace regex_spelled, '<span id="'+spelled_word+acronym+'" class="acro_pair">$&</span>'
+					tooltipped_words.push([acronym,spelled_word])
 			if acro_flag
 				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
-	return text_content
+	console.log(tooltipped_words)
+	return {"html":text_content, "tooltipped_words":tooltipped_words}
 
 add_tooltip_custom = (selector, msg) ->
 	tippy(selector, {content:msg,flip:false})
@@ -140,8 +143,8 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 queep= ->
 
 	text_content = $('#output').html()
-	text_content = highlight_word_acro_pairs(text_content,word_acro_data)
-	return {'html':text_content}
+	result = highlight_word_acro_pairs(text_content,word_acro_data)
+	return result # returning: {'html': text_content, 'tooltipped_words':[]}
 
 $ ->
 	$("#input").on "input propertychange paste", ->
@@ -150,6 +153,6 @@ $ ->
 
 		result = queep()
 		$('#output').html result['html']
-	#	add_tooltips(result['acronym_words'])
+		add_tooltips(result['tooltipped_words'])
 		add_tooltip_custom(".acro_green", "Approved abbreviation")
 		return

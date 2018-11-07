@@ -128,7 +128,8 @@
   // this function will detect multi-words (e.g. Air Force)
 
   highlight_word_acro_pairs = function(text_content, word_acro_array) {
-    var acro_flag, acronym, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word;
+    var acro_flag, acronym, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word, tooltipped_words;
+    tooltipped_words = [];
     ref = Object.keys(word_acro_array);
     for (i = 0, len = ref.length; i < len; i++) {
       acronym = ref[i];
@@ -143,6 +144,7 @@
             acro_flag = false;
             text_content = text_content.replace(regex_acro, '<span id="' + acronym + spelled_word + '" class="acro_pair">$&</span>');
             text_content = text_content.replace(regex_spelled, '<span id="' + spelled_word + acronym + '" class="acro_pair">$&</span>');
+            tooltipped_words.push([acronym, spelled_word]);
           }
         }
         if (acro_flag) {
@@ -150,7 +152,11 @@
         }
       }
     }
-    return text_content;
+    console.log(tooltipped_words);
+    return {
+      "html": text_content,
+      "tooltipped_words": tooltipped_words
+    };
   };
 
   add_tooltip_custom = function(selector, msg) {
@@ -183,12 +189,10 @@
   };
 
   queep = function() {
-    var text_content;
+    var result, text_content;
     text_content = $('#output').html();
-    text_content = highlight_word_acro_pairs(text_content, word_acro_data);
-    return {
-      'html': text_content
-    };
+    result = highlight_word_acro_pairs(text_content, word_acro_data);
+    return result; // returning: {'html': text_content, 'tooltipped_words':[]}
   };
 
   $(function() {
@@ -198,7 +202,7 @@
       $('#output').text($('#input').val());
       result = queep();
       $('#output').html(result['html']);
-      //	add_tooltips(result['acronym_words'])
+      add_tooltips(result['tooltipped_words']);
       add_tooltip_custom(".acro_green", "Approved abbreviation");
     });
   });
