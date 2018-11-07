@@ -122,7 +122,6 @@ highlight_word_acro_pairs = (text_content,acronym_words) ->
 add_tooltip_custom = (selector, msg) ->
 	tippy(selector, {content:msg,flip:false})
 	return
-
 add_tooltips = (acronym_words) ->
 	for pair in acronym_words
 		add_tooltip_custom('#'+pair[0]+pair[1],"Change to: " +pair[1])
@@ -134,8 +133,8 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 	text_array = text_content.split(" ")
 	for acro in acronym_array
 		lower_word = acro.toLowerCase()
-		regex = ///^#{acro}|[\ ]#{acro}(?=([\ \;\!\-]|$))///gi
-		text_content = text_content.replace(regex,' <span id="'+acro+'" class="acro_green">'+acro+'</span>')
+		regex = ///(^#{acro}|[\ ]#{acro})(?=([\ \!\-/\;]|$))///gim
+		text_content = text_content.replace(regex,' <span id="'+acro+'" class="acro_green">$&</span>')
 		
 	return text_content
 
