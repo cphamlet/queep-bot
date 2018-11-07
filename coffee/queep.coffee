@@ -104,7 +104,9 @@ acronym_and_word_check = (text_content,word_acro_array) ->
 # this function will detect multi-words (e.g. Air Force)
 #
 highlight_word_acro_pairs = (text_content,word_acro_array) ->
+
 	tooltipped_words = [];
+
 	for acronym in Object.keys word_acro_array
 		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
 		if regex_acro.test(text_content)
@@ -115,6 +117,7 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 					acro_flag = false
 					text_content = text_content.replace regex_acro, '<span id="'+acronym+spelled_word+'" class="acro_pair">$&</span>'
 					text_content = text_content.replace regex_spelled, '<span id="'+spelled_word+acronym+'" class="acro_pair">$&</span>'
+
 					tooltipped_words.push([acronym,spelled_word])
 			if acro_flag
 				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
@@ -143,8 +146,10 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 queep= ->
 
 	text_content = $('#output').html()
+
 	result = highlight_word_acro_pairs(text_content,word_acro_data)
 	return result # returning: {'html': text_content, 'tooltipped_words':[]}
+
 
 $ ->
 	$("#input").on "input propertychange paste", ->

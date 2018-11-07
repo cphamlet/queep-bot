@@ -143,7 +143,7 @@
           if (regex_spelled.test(text_content)) {
             acro_flag = false;
             text_content = text_content.replace(regex_acro, '<span id="' + acronym + spelled_word + '" class="acro_pair">$&</span>');
-            text_content = text_content.replace(regex_spelled, '<span id="' + spelled_word + acronym + '" class="acro_pair">$&</span>');
+            text_content = text_content.replace(regex_spelled, '<span id="' + spelled_word + acronym + '" class="acro_pair">$&</span>')
             tooltipped_words.push([acronym, spelled_word]);
           }
         }
