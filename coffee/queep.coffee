@@ -66,11 +66,8 @@ highlight_typos = (typos,text_content) ->
 
 spell_check = (text_content,dict_array) ->
 	clean_text = text_content.replace /[.,\/()\;:{}!?-]/g," "
-	# clean_text = clean_text.toLowerCase()
 	clean_text = clean_text.replace /\s+/g," "
-
 	text_array = clean_text.split(" ")
-
 	typos = []
 
 	for word in text_array
@@ -80,50 +77,50 @@ spell_check = (text_content,dict_array) ->
 	return typos
 
 acronym_and_word_check = (text_content,word_acro_array) ->
-	text_array = text_content.split(" ")
-	# console.log clean_text
-	acronym_words = []
+	# text_array = text_content.split(" ")
+	# acronym_words = []
 
-	lower_case_tokens = []
+	# lower_case_tokens = []
 
-	`text_array.forEach(function(ele){
-	lower_case_tokens.push(ele.toLowerCase());
-	})`
+	# `text_array.forEach(function(ele){
+	# lower_case_tokens.push(ele.toLowerCase());
+	# })`
 	
-	for word in text_array
-		word = word.toLowerCase();
+	# for word in text_array
+	# 	word = word.toLowerCase();
 
-		#If the word is an ancronym
-		if word_acro_array[word] 
-			#See if any of the spelled out versions exists in the input
-			for alt_word in word_acro_array[word]
-				if alt_word in lower_case_tokens and [word, word_acro_array[word]] not in acronym_words
-					acronym_words.push([word,alt_word])
+	# 	#If the word is an ancronym
+	# 	if word_acro_array[word] 
+	# 		#See if any of the spelled out versions exists in the input
+	# 		for alt_word in word_acro_array[word]
+	# 			if alt_word in lower_case_tokens and [word, word_acro_array[word]] not in acronym_words
+	# 				acronym_words.push([word,alt_word])
 
-	return acronym_words
+	# return acronym_words
 
-highlight_word_acro_pairs = (text_content,acronym_words) ->
-	for pair in acronym_words
-		word1 = pair[0]
-		word2 = pair[1]
-		id1 = word1+word2
-		id2 = word2+word1
-		if navigator.userAgent.indexOf('Chrome') is not -1
-			text_content = text_content.replace ///(?<=[\ ]|^)#{word1}(?=([\ ]|$))///gi,'<span id="'+id1+'" class="acro_pair">$&</span>'
-			text_content = text_content.replace ///(?<=[\ ]|^)#{word2}(?=([\ ]|$))///gi,'<span id="'+id2+'" class="acro_pair">$&</span>'
-		else
-			text_content = text_content.replace ///[\ ]#{word1}(?=([\ \<]|$))///gi,'<span id="'+id1+'" class="acro_pair">$&</span>'
-			text_content = text_content.replace ///[\ ]#{word2}(?=([\ \<]|$))///gi,'<span id="'+id2+'" class="acro_pair">$&</span>'
-			
-			text_content = text_content.replace ///^#{word1}(?=([\ \<]|$))///gi,'<span id="'+id1+'" class="acro_pair">$&</span>'
-			text_content = text_content.replace ///^#{word2}(?=([\ \<]|$))///gi,'<span id="'+id2+'" class="acro_pair">$&</span>'
 
+#
+# This has been changed to a pure regex version,
+# this function will detect multi-words (e.g. Air Force)
+#
+highlight_word_acro_pairs = (text_content,word_acro_array) ->
+	for acronym in Object.keys word_acro_array
+		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
+		if regex_acro.test(text_content)
+			acro_flag = true
+			for spelled_word in word_acro_array[acronym]
+				regex_spelled = ///(\b#{spelled_word}(?![a-zA-Z<\"=]))///gim
+				if regex_spelled.test(text_content)
+					acro_flag = false
+					text_content = text_content.replace regex_acro, '<span id="'+acronym+spelled_word+'" class="acro_pair">$&</span>'
+					text_content = text_content.replace regex_spelled, '<span id="'+spelled_word+acronym+'" class="acro_pair">$&</span>'
+			if acro_flag
+				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
 	return text_content
 
 add_tooltip_custom = (selector, msg) ->
 	tippy(selector, {content:msg,flip:false})
 	return
-
 add_tooltips = (acronym_words) ->
 	for pair in acronym_words
 		add_tooltip_custom('#'+pair[0]+pair[1],"Change to: " +pair[1])
@@ -133,37 +130,26 @@ add_tooltips = (acronym_words) ->
 highlight_valid_acros = (text_content, word_acro_array) ->
 	acronym_array = Object.keys word_acro_array
 	text_array = text_content.split(" ")
-	for word in text_array
-
-		if word.toLowerCase() in acronym_array
-			console.log "ST8"
-			text_content = text_content.replace ///^#{word}|[\ ]#{word}(?=([\ ]|$))///gi,'<span id="'+word+'" class="acro_green">$&</span>'
-			
+	for acro in acronym_array
+		lower_word = acro.toLowerCase()
+		regex = ///(\b#{acro})(?=([\n\ \!\-/\;]|$))///gim
+		text_content = text_content.replace(regex,'<span id="'+acro+'" class="acro_green">$&</span>')
+		
 	return text_content
 
 queep= ->
 
 	text_content = $('#output').html()
-	
-	# console.log("EPR/OPR text content:" + text_content)
-	# approved_acronym_check(text_content)
-	# duplicate_acronyms = duplicate_acronym_check(text_content)
-	# text_content = highlight_dupes(duplicate_acronyms, text_content)
-
-	acronym_words = acronym_and_word_check(text_content,word_acro_data)
-	text_content = highlight_word_acro_pairs(text_content,acronym_words)
-	text_content = highlight_valid_acros(text_content, word_acro_data)
-	# typos = spell_check(text_content,dict_array)
-	# text_content = highlight_typos(typos,text_content)
-	# $('#text_content').focus()
-	return {'html':text_content,'acronym_words':acronym_words}
+	text_content = highlight_word_acro_pairs(text_content,word_acro_data)
+	return {'html':text_content}
 
 $ ->
 	$("#input").on "input propertychange paste", ->
 		#Adds the text you type in, to the output. 
 		$('#output').text $('#input').val()
+
 		result = queep()
 		$('#output').html result['html']
-		add_tooltips(result['acronym_words'])
+	#	add_tooltips(result['acronym_words'])
 		add_tooltip_custom(".acro_green", "Approved abbreviation")
 		return

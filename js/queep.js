@@ -89,7 +89,6 @@
   spell_check = function(text_content, dict_array) {
     var clean_text, i, len, ref, text_array, typos, word;
     clean_text = text_content.replace(/[.,\/()\;:{}!?-]/g, " ");
-    // clean_text = clean_text.toLowerCase()
     clean_text = clean_text.replace(/\s+/g, " ");
     text_array = clean_text.split(" ");
     typos = [];
@@ -102,49 +101,53 @@
     return typos;
   };
 
-  acronym_and_word_check = function(text_content, word_acro_array) {
-    var acronym_words, alt_word, i, j, len, len1, lower_case_tokens, ref, text_array, word;
-    text_array = text_content.split(" ");
-    // console.log clean_text
-    acronym_words = [];
-    lower_case_tokens = [];
-    text_array.forEach(function(ele){
-	lower_case_tokens.push(ele.toLowerCase());
-	});
-    for (i = 0, len = text_array.length; i < len; i++) {
-      word = text_array[i];
-      word = word.toLowerCase();
-      if (word_acro_array[word]) {
-        ref = word_acro_array[word];
-        
-        //See if any of the spelled out versions exists in the input
-        for (j = 0, len1 = ref.length; j < len1; j++) {
-          alt_word = ref[j];
-          if (indexOf.call(lower_case_tokens, alt_word) >= 0 && indexOf.call(acronym_words, [word, word_acro_array[word]]) < 0) {
-            acronym_words.push([word, alt_word]);
+  acronym_and_word_check = function(text_content, word_acro_array) {};
+
+  // text_array = text_content.split(" ")
+  // acronym_words = []
+
+  // lower_case_tokens = []
+
+  // `text_array.forEach(function(ele){
+  // lower_case_tokens.push(ele.toLowerCase());
+  // })`
+
+  // for word in text_array
+  // 	word = word.toLowerCase();
+
+  // 	#If the word is an ancronym
+  // 	if word_acro_array[word] 
+  // 		#See if any of the spelled out versions exists in the input
+  // 		for alt_word in word_acro_array[word]
+  // 			if alt_word in lower_case_tokens and [word, word_acro_array[word]] not in acronym_words
+  // 				acronym_words.push([word,alt_word])
+
+  // return acronym_words
+
+  // This has been changed to a pure regex version,
+  // this function will detect multi-words (e.g. Air Force)
+
+  highlight_word_acro_pairs = function(text_content, word_acro_array) {
+    var acro_flag, acronym, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word;
+    ref = Object.keys(word_acro_array);
+    for (i = 0, len = ref.length; i < len; i++) {
+      acronym = ref[i];
+      regex_acro = RegExp(`(\\b${acronym}(?![a-zA-Z<"=]))`, "gim");
+      if (regex_acro.test(text_content)) {
+        acro_flag = true;
+        ref1 = word_acro_array[acronym];
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          spelled_word = ref1[j];
+          regex_spelled = RegExp(`(\\b${spelled_word}(?![a-zA-Z<"=]))`, "gim");
+          if (regex_spelled.test(text_content)) {
+            acro_flag = false;
+            text_content = text_content.replace(regex_acro, '<span id="' + acronym + spelled_word + '" class="acro_pair">$&</span>');
+            text_content = text_content.replace(regex_spelled, '<span id="' + spelled_word + acronym + '" class="acro_pair">$&</span>');
           }
         }
-      }
-    }
-    return acronym_words;
-  };
-
-  highlight_word_acro_pairs = function(text_content, acronym_words) {
-    var i, id1, id2, len, pair, word1, word2;
-    for (i = 0, len = acronym_words.length; i < len; i++) {
-      pair = acronym_words[i];
-      word1 = pair[0];
-      word2 = pair[1];
-      id1 = word1 + word2;
-      id2 = word2 + word1;
-      if (navigator.userAgent.indexOf('Chrome') === !-1) {
-        text_content = text_content.replace(RegExp(`(?<=[ ]|^)${word1}(?=([ ]|$))`, "gi"), '<span id="' + id1 + '" class="acro_pair">$&</span>');
-        text_content = text_content.replace(RegExp(`(?<=[ ]|^)${word2}(?=([ ]|$))`, "gi"), '<span id="' + id2 + '" class="acro_pair">$&</span>');
-      } else {
-        text_content = text_content.replace(RegExp(`[ ]${word1}(?=([ \\<]|$))`, "gi"), '<span id="' + id1 + '" class="acro_pair">$&</span>');
-        text_content = text_content.replace(RegExp(`[ ]${word2}(?=([ \\<]|$))`, "gi"), '<span id="' + id2 + '" class="acro_pair">$&</span>');
-        text_content = text_content.replace(RegExp(`^${word1}(?=([ \\<]|$))`, "gi"), '<span id="' + id1 + '" class="acro_pair">$&</span>');
-        text_content = text_content.replace(RegExp(`^${word2}(?=([ \\<]|$))`, "gi"), '<span id="' + id2 + '" class="acro_pair">$&</span>');
+        if (acro_flag) {
+          text_content = text_content.replace(regex_acro, '<span id="' + acronym + '" class="acro_green">$&</span>');
+        }
       }
     }
     return text_content;
@@ -167,36 +170,24 @@
   };
 
   highlight_valid_acros = function(text_content, word_acro_array) {
-    var acronym_array, i, len, ref, text_array, word;
+    var acro, acronym_array, i, len, lower_word, regex, text_array;
     acronym_array = Object.keys(word_acro_array);
     text_array = text_content.split(" ");
-    for (i = 0, len = text_array.length; i < len; i++) {
-      word = text_array[i];
-      if (ref = word.toLowerCase(), indexOf.call(acronym_array, ref) >= 0) {
-        console.log("ST8");
-        text_content = text_content.replace(RegExp(`^${word}|[ ]${word}(?=([ ]|$))`, "gi"), '<span id="' + word + '" class="acro_green">$&</span>');
-      }
+    for (i = 0, len = acronym_array.length; i < len; i++) {
+      acro = acronym_array[i];
+      lower_word = acro.toLowerCase();
+      regex = RegExp(`(\\b${acro})(?=([\\n \\!\\-/\\;]|$))`, "gim");
+      text_content = text_content.replace(regex, '<span id="' + acro + '" class="acro_green">$&</span>');
     }
     return text_content;
   };
 
   queep = function() {
-    var acronym_words, text_content;
+    var text_content;
     text_content = $('#output').html();
-    
-    // console.log("EPR/OPR text content:" + text_content)
-    // approved_acronym_check(text_content)
-    // duplicate_acronyms = duplicate_acronym_check(text_content)
-    // text_content = highlight_dupes(duplicate_acronyms, text_content)
-    acronym_words = acronym_and_word_check(text_content, word_acro_data);
-    text_content = highlight_word_acro_pairs(text_content, acronym_words);
-    text_content = highlight_valid_acros(text_content, word_acro_data);
+    text_content = highlight_word_acro_pairs(text_content, word_acro_data);
     return {
-      // typos = spell_check(text_content,dict_array)
-      // text_content = highlight_typos(typos,text_content)
-      // $('#text_content').focus()
-      'html': text_content,
-      'acronym_words': acronym_words
+      'html': text_content
     };
   };
 
@@ -207,7 +198,7 @@
       $('#output').text($('#input').val());
       result = queep();
       $('#output').html(result['html']);
-      add_tooltips(result['acronym_words']);
+      //	add_tooltips(result['acronym_words'])
       add_tooltip_custom(".acro_green", "Approved abbreviation");
     });
   });
