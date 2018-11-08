@@ -240,13 +240,13 @@ var word_acro_data = {
     "mon": ["monday"],
     "mo": ["month", "months"],
     "mos": ["month", "months"],
-    "natl": ["national"],
+    "natl": ["national", "nat'l"],
     "neg": ["negative"],
     "norm": ["normal"],
     "n/a": ["not applicable"],
     "nov": ["november"],
     "#": ["number"],
-    "no.": ["#", "number"],
+    "no\\.": ["#", "number"],
     "obj": ["object", "objects"],
     "objs": ["object", "objects"],
     "oct": ["october"],
@@ -411,7 +411,7 @@ var word_acro_data = {
     "mgrs":["manager", "managers"],
     "msg": ["message"],
     "msgs": ["message", "messages"],
-    "nat'l": ["national"],
+    "nat'l": ["national", "natl"],
     "op": ["operation"],
     "pax": ["passengers"],
     "prsnl": ["personnel"],
@@ -422,6 +422,5 @@ var word_acro_data = {
     "schd": ["schedule"],
     "sen": ["senator"],
     "sim": ["simulator"],
-    "stu": ["student"],
-    "vs.": ["versus"]
+    "stu": ["student"]
 }
