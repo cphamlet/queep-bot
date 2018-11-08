@@ -77,38 +77,18 @@ spell_check = (text_content,dict_array) ->
 	return typos
 
 acronym_and_word_check = (text_content,word_acro_array) ->
-	# text_array = text_content.split(" ")
-	# acronym_words = []
-
-	# lower_case_tokens = []
-
-	# `text_array.forEach(function(ele){
-	# lower_case_tokens.push(ele.toLowerCase());
-	# })`
-	
-	# for word in text_array
-	# 	word = word.toLowerCase();
-
-	# 	#If the word is an ancronym
-	# 	if word_acro_array[word] 
-	# 		#See if any of the spelled out versions exists in the input
-	# 		for alt_word in word_acro_array[word]
-	# 			if alt_word in lower_case_tokens and [word, word_acro_array[word]] not in acronym_words
-	# 				acronym_words.push([word,alt_word])
-
-	# return acronym_words
-
 
 #
 # This has been changed to a pure regex version,
 # this function will detect multi-words (e.g. Air Force)
 #
 highlight_word_acro_pairs = (text_content,word_acro_array) ->
-
 	tooltipped_words = [];
-
 	for acronym in Object.keys word_acro_array
 		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
+		if acronym == "&amp;"
+			regex_acro = ///(#{acronym})///gim
+
 		if regex_acro.test(text_content)
 			acro_flag = true
 			for spelled_word in word_acro_array[acronym]
@@ -117,11 +97,9 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 					acro_flag = false
 					text_content = text_content.replace regex_acro, '<span id="'+acronym+spelled_word+'" class="acro_pair">$&</span>'
 					text_content = text_content.replace regex_spelled, '<span id="'+spelled_word+acronym+'" class="acro_pair">$&</span>'
-
 					tooltipped_words.push([acronym,spelled_word])
 			if acro_flag
 				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
-	console.log(tooltipped_words)
 	return {"html":text_content, "tooltipped_words":tooltipped_words}
 
 add_tooltip_custom = (selector, msg) ->
@@ -146,10 +124,8 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 queep= ->
 
 	text_content = $('#output').html()
-
 	result = highlight_word_acro_pairs(text_content,word_acro_data)
 	return result # returning: {'html': text_content, 'tooltipped_words':[]}
-
 
 $ ->
 	$("#input").on "input propertychange paste", ->
