@@ -107,6 +107,9 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 	tooltipped_words = [];
 	for acronym in Object.keys word_acro_array
 		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
+		if acronym == "&amp;"
+			regex_acro = ///(#{acronym})///gim
+
 		if regex_acro.test(text_content)
 			acro_flag = true
 			for spelled_word in word_acro_array[acronym]
@@ -118,7 +121,6 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 					tooltipped_words.push([acronym,spelled_word])
 			if acro_flag
 				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
-	console.log(tooltipped_words)
 	return {"html":text_content, "tooltipped_words":tooltipped_words}
 
 add_tooltip_custom = (selector, msg) ->

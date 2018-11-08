@@ -134,6 +134,9 @@
     for (i = 0, len = ref.length; i < len; i++) {
       acronym = ref[i];
       regex_acro = RegExp(`(\\b${acronym}(?![a-zA-Z<"=]))`, "gim");
+      if (acronym === "&amp;") {
+        regex_acro = RegExp(`(${acronym})`, "gim");
+      }
       if (regex_acro.test(text_content)) {
         acro_flag = true;
         ref1 = word_acro_array[acronym];
@@ -152,7 +155,6 @@
         }
       }
     }
-    console.log(tooltipped_words);
     return {
       "html": text_content,
       "tooltipped_words": tooltipped_words
