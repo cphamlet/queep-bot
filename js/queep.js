@@ -103,27 +103,7 @@
 
   acronym_and_word_check = function(text_content, word_acro_array) {};
 
-  // text_array = text_content.split(" ")
-  // acronym_words = []
-
-  // lower_case_tokens = []
-
-  // `text_array.forEach(function(ele){
-  // lower_case_tokens.push(ele.toLowerCase());
-  // })`
-
-  // for word in text_array
-  // 	word = word.toLowerCase();
-
-  // 	#If the word is an ancronym
-  // 	if word_acro_array[word] 
-  // 		#See if any of the spelled out versions exists in the input
-  // 		for alt_word in word_acro_array[word]
-  // 			if alt_word in lower_case_tokens and [word, word_acro_array[word]] not in acronym_words
-  // 				acronym_words.push([word,alt_word])
-
-  // return acronym_words
-
+  
   // This has been changed to a pure regex version,
   // this function will detect multi-words (e.g. Air Force)
 
