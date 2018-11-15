@@ -1,139 +1,229 @@
-check_single_acronym = (text_array, acronym_list) ->
-	matches = []
-	for acronym1 in acronym_list
-		for acronym2 in acronym_list
-			if acronym1 in text_array and acronym2 in text_array and acronym1 isnt acronym2 and acronym1 not in matches
-				matches.push acronym1
-				if matches.length == acronym_list.length
-					break
-	return matches
-			
+# ENUMS          
+# This is where the enum-like objects
+# are defined
 
-###
-This function checks the EPR/OPR content for duplicate acronyms
-by duplicates we mean using both CDR and CMDR in the same text
-since these mean the same thing, you should be consistent
-###
-duplicate_acronym_check = (text_content) ->
-	# get the actual text in the duplicate acronyms text box
-	duplicate_acronym_list_raw = $('#duplicate_acronyms').val()
+itemTypes = 
+	abbrev	: 'abbreviation'
+	word	: 'word'
 
-	# lowercase it, we don't care about case for dupes
-	# duplicate_acronym_list_raw = duplicate_acronym_list_raw.toLowerCase()
+itemIssues =
+	multipleAbbrevs	: 'multiple abbreviations'
+	abbrevAndWord	: 'abbreviation and word'
 
-	#get rid of spaces
-	duplicate_acronym_list_raw = duplicate_acronym_list_raw.replace /[ ]/g,""
+# END ENUMS
+
+
+
+# BEGIN item issue functions
+# this group of functions looks at an item
+# and returns true if it has a particular error
+# and false otherwise, optionally also returns some item details
+
+str_to_char_dict = () ->
+	return arguments
+
+multiple_abbrevs = (item_to_check, item) ->
+	if item == item_to_check
+		# this is the one we're checking!
+		return false
+	if item['hash'] == item_to_check['hash'] and\
+		item['word'] != item_to_check['word'] and\
+		item['type'] == itemTypes.abbrev and\
+		item_to_check['type'] == itemTypes.abbrev
+		return true
+	return false
+
+abbrev_and_word = (item_to_check, item) ->
+	if item == item_to_check
+		# this is the one we're checking!
+		return false
+	if item['hash'] == item_to_check['hash'] and item['word'] != item_to_check['word'] and
+		(
+			(item['type'] == itemTypes.abbrev and item_to_check['type'] == itemTypes.word) or
+			(item['type'] == itemTypes.word and item_to_check['type'] == itemTypes.abbrev)
+		)
+		return true
+	return false
+
+# END item issue functions
+
+tag_issue = (item) ->
+	if itemIssues.multipleAbbrevs in item['issues']
+		return '<span class = "dupe">'+item['word']+'</span>'
+	else if itemIssues.abbrevAndWord in item['issues']
+		return '<span class = "acro_pair">'+item['word']+'</span>'
+	else if item['issues'].length == 0 and item['type'] == itemTypes.word
+		return '<span class = "just_word">'+item['word']+'</span>'
+
+	return item['word']
+
+
+highlight_line = (line, items, line_num) ->
+	# "spread" the line
+	# basically converts it to a char array
+	line_dict = str_to_char_dict(...line)
 	
-	# make our text an array split on newlines
-	duplicate_acronym_list = duplicate_acronym_list_raw.split("\n")
-	
-	# split each line on commas (only supports csv right now)
-	for acronym_list in duplicate_acronym_list
-		duplicate_acronym_list[duplicate_acronym_list.indexOf(acronym_list)] = acronym_list.split(",")
+	for item in items
+		if item['line'] == line_num
+			for i in [item['loc']...item['loc']+item['word'].length]
+				delete line_dict[i]
+			line_dict[item['loc']] = item
 
-	clean_text = text_content.replace /[.,\/()\;:{}!?-]/g," "
-	# clean_text = clean_text.toLowerCase()
-	clean_text = clean_text.replace /\s+/g," "
+	highlighted_line = ''
 
-	text_array = clean_text.split(" ")
+	for key in Object.keys(line_dict)
+		elem = line_dict[key]
 
-	duplicate_acronyms = []
-	
-	for acronym_list in duplicate_acronym_list
-		new_elem = check_single_acronym(text_array, acronym_list)
-		if new_elem
-			duplicate_acronyms.push new_elem
-	
-	return duplicate_acronyms
+		if typeof elem == 'string'
+			highlighted_line += elem
+		else
+			highlighted_line += tag_issue(elem)
+
+		console.log highlighted_line
+	return highlighted_line
 
 
+highlight_issues = (text, items) ->
+	console.log(text)
+	lines = text.split('\n')
+	highlighted_text = ''
 
-###
-highlights all items in the array passed to it
+	for i in [0...lines.length]
+		highlighted_text += highlight_line(lines[i],items,i) + '\n'
 
-TODO: tie together elements from the same array
-###
-highlight_dupes = (duplicate_acronyms, text_content) ->
-	for acronym_list in duplicate_acronyms
-		for acronym in acronym_list
-			text_content = text_content.replace ///(?<=[^a-zA-Z]|^)#{acronym}(?=([^a-zA-Z]|$))///gi,'<span class="dupe">'+acronym+'</span>'
-	return text_content
+	return highlighted_text
 
-highlight_typos = (typos,text_content) ->
-	for typo in typos
-		text_content = text_content.replace ///(?<=[^a-zA-Z]|^)#{typo}(?=([^a-zA-Z]|$))///gi,'<span class="typo">'+typo+'</span>'
-	return text_content
 
-spell_check = (text_content,dict_array) ->
-	clean_text = text_content.replace /[.,\/()\;:{}!?-]/g," "
-	clean_text = clean_text.replace /\s+/g," "
-	text_array = clean_text.split(" ")
-	typos = []
+# finds any problems that items may have
+# which may need to be pointed out
+find_item_issues = (items) ->
+	for item_to_check in items
+		item_to_check['issues'] = []
 
-	for word in text_array
-		if word.toLowerCase() not in dict_array and word not in typos
-			typos.push(word)
+		for other_item in items
+			if item_to_check == other_item
+				continue
 
-	return typos
+			if multiple_abbrevs(item_to_check,other_item)
+				item_to_check['issues'].push(itemIssues.multipleAbbrevs)
 
-acronym_and_word_check = (text_content,word_acro_array) ->
+			if abbrev_and_word(item_to_check,other_item)
+				if itemIssues.abbrevAndWord not in item_to_check['issues']
+					item_to_check['issues'].push(itemIssues.abbrevAndWord)
 
-#
-# This has been changed to a pure regex version,
-# this function will detect multi-words (e.g. Air Force)
-#
-highlight_word_acro_pairs = (text_content,word_acro_array) ->
-	tooltipped_words = [];
-	for acronym in Object.keys word_acro_array
-		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
-		if acronym == "&amp;"
-			regex_acro = ///(#{acronym})///gim
+	return items
 
-		if regex_acro.test(text_content)
-			acro_flag = true
-			for spelled_word in word_acro_array[acronym]
-				regex_spelled = ///(\b#{spelled_word}(?![a-zA-Z<\"=]))///gim
-				if regex_spelled.test(text_content)
-					acro_flag = false
-					text_content = text_content.replace regex_acro, '<span id="'+acronym+spelled_word+'" class="acro_pair">$&</span>'
-					text_content = text_content.replace regex_spelled, '<span id="'+spelled_word+acronym+'" class="acro_pair">$&</span>'
-					tooltipped_words.push([acronym,spelled_word])
-			if acro_flag
-				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
-	return {"html":text_content, "tooltipped_words":tooltipped_words}
+is_alphanumeric = (char) ->
+	code = char.charCodeAt(0)
 
-add_tooltip_custom = (selector, msg) ->
-	tippy(selector, {content:msg,flip:false})
-	return
-add_tooltips = (acronym_words) ->
-	for pair in acronym_words
-		add_tooltip_custom('#'+pair[0]+pair[1],"Change to: " +pair[1])
-		add_tooltip_custom('#'+pair[1]+pair[0],"Change to: " +pair[0])
-	return
+	if !(code > 47 && code < 58) and !(code > 64 && code < 91) && !(code > 96 && code < 123)
+		return false
 
-highlight_valid_acros = (text_content, word_acro_array) ->
-	acronym_array = Object.keys word_acro_array
-	text_array = text_content.split(" ")
-	for acro in acronym_array
-		lower_word = acro.toLowerCase()
-		regex = ///(\b#{acro})(?=([\n\ \!\-/\;]|$))///gim
-		text_content = text_content.replace(regex,'<span id="'+acro+'" class="acro_green">$&</span>')
-		
-	return text_content
+	return true
+
+# find just the items in one line
+find_items_in_line = (line, max_len, items, line_num) ->
+	# our max len can't be longer than the actual line is
+	max_len = Math.min(max_len,line.length)
+
+	# an empty dictionary to store our items
+	found = []
+	# cut every possible slice
+	for line_loc in [0...line.length]
+
+		max_len = Math.min(max_len,line.length-line_loc)
+		for i in [max_len...0]
+			word = line.slice(line_loc,line_loc+i)
+			if items[word] and (line_loc == 0 or !is_alphanumeric(line.slice(line_loc-1,line_loc))) and (line_loc+i == line.length or !is_alphanumeric(line.slice(line_loc+i,line_loc+i+1)))
+				found.push({
+					'loc':line_loc
+					'word':word
+					'line':line_num
+					'dict':items[word]['dict']
+					'type':items[word]['type']
+					'hash':items[word]['hash']
+					})
+	return found
+
+# find all items of interest in the text
+find_items = (text, items) ->
+	found = []
+	# get individual lines
+	lines = text.split('\n')
+
+	# TODO: change this to the max item length, not line length
+	# the max length of an item (is what it should be)
+	max_len = 10
+
+	# iterate through all the lines
+	for i in [0...lines.length]
+		found = found.concat(find_items_in_line(lines[i], max_len, items, i))
+
+	return found
 
 queep= ->
+	text = $('#output').html()
+	found = find_items(text,
+		{
+			'training':{
+				'dict':{
+					'abbrevs':['trng'],'words':['training']
+				},
+				'type':itemTypes.word,
+				'hash':'asdfbeqr'
+			},
+			'trng':{
+				'dict':{
+					'abbrevs':['trng'],'words':['training']
+				},
+				'type':itemTypes.abbrev,
+				'hash':'asdfbeqr'
+			},
+			'msn':{
+				'dict':{
+					'abbrevs':['msn','misn'],'words':['mission']
+				},
+				'type':itemTypes.abbrev,
+				'hash':'mmmm'
+			},
+			'misn':{
+				'dict':{
+					'abbrevs':['msn','misn'],'words':['mission']
+				},
+				'type':itemTypes.abbrev,
+				'hash':'mmmm'
+			},
+			'&amp;':{
+				'dict':{
+					'abbrevs':['&amp'],'words':['and']
+				},
+				'type':itemTypes.abbrev,
+				'hash':'zzzzz'
+			},
+			'and':{
+				'dict':{
+					'abbrevs':['&amp;'],'words':['and']
+				},
+				'type':itemTypes.word,
+				'hash':'zzzzz'
+			}
+		})
+	console.log find_item_issues(found)
 
-	text_content = $('#output').html()
-	result = highlight_word_acro_pairs(text_content,word_acro_data)
-	return result # returning: {'html': text_content, 'tooltipped_words':[]}
+	html = highlight_issues(text, found)
+
+	# result = highlight_word_acro_pairs(text_content,word_acro_data)
+	return {'html':html,'issues':found} # returning: {'html': text_content, 'tooltipped_words':[]}
 
 $ ->
 	$("#input").on "input propertychange paste", ->
 		#Adds the text you type in, to the output. 
 		$('#output').text $('#input').val()
 
+		console.log "***********BEGIN TO QUEEP*************"
 		result = queep()
+		console.log "***********CEASE TO QUEEP*************"
 		$('#output').html result['html']
-		add_tooltips(result['tooltipped_words'])
-		add_tooltip_custom(".acro_green", "Approved abbreviation")
+		# add_tooltips(result['tooltipped_words'])
+		# add_tooltip_custom(".acro_green", "Approved abbreviation")
 		return
