@@ -40,6 +40,7 @@ body{
     border-radius: 5px;
     box-shadow: 3px 2px 4px grey;
     padding: 1em;
+    cursor: pointer;
 }
 #title, #title-text{
     margin-bottom:1em;

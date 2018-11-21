@@ -1,53 +1,3 @@
-check_single_acronym = (text_array, acronym_list) ->
-	matches = []
-	for acronym1 in acronym_list
-		for acronym2 in acronym_list
-			if acronym1 in text_array and acronym2 in text_array and acronym1 isnt acronym2 and acronym1 not in matches
-				matches.push acronym1
-				if matches.length == acronym_list.length
-					break
-	return matches
-			
-
-###
-This function checks the EPR/OPR content for duplicate acronyms
-by duplicates we mean using both CDR and CMDR in the same text
-since these mean the same thing, you should be consistent
-###
-duplicate_acronym_check = (text_content) ->
-	# get the actual text in the duplicate acronyms text box
-	duplicate_acronym_list_raw = $('#duplicate_acronyms').val()
-
-	# lowercase it, we don't care about case for dupes
-	# duplicate_acronym_list_raw = duplicate_acronym_list_raw.toLowerCase()
-
-	#get rid of spaces
-	duplicate_acronym_list_raw = duplicate_acronym_list_raw.replace /[ ]/g,""
-	
-	# make our text an array split on newlines
-	duplicate_acronym_list = duplicate_acronym_list_raw.split("\n")
-	
-	# split each line on commas (only supports csv right now)
-	for acronym_list in duplicate_acronym_list
-		duplicate_acronym_list[duplicate_acronym_list.indexOf(acronym_list)] = acronym_list.split(",")
-
-	clean_text = text_content.replace /[.,\/()\;:{}!?-]/g," "
-	# clean_text = clean_text.toLowerCase()
-	clean_text = clean_text.replace /\s+/g," "
-
-	text_array = clean_text.split(" ")
-
-	duplicate_acronyms = []
-	
-	for acronym_list in duplicate_acronym_list
-		new_elem = check_single_acronym(text_array, acronym_list)
-		if new_elem
-			duplicate_acronyms.push new_elem
-	
-	return duplicate_acronyms
-
-
-
 ###
 highlights all items in the array passed to it
 
@@ -64,40 +14,46 @@ highlight_typos = (typos,text_content) ->
 		text_content = text_content.replace ///(?<=[^a-zA-Z]|^)#{typo}(?=([^a-zA-Z]|$))///gi,'<span class="typo">'+typo+'</span>'
 	return text_content
 
-spell_check = (text_content,dict_array) ->
-	clean_text = text_content.replace /[.,\/()\;:{}!?-]/g," "
-	clean_text = clean_text.replace /\s+/g," "
-	text_array = clean_text.split(" ")
-	typos = []
-
-	for word in text_array
-		if word.toLowerCase() not in dict_array and word not in typos
-			typos.push(word)
-
-	return typos
-
-acronym_and_word_check = (text_content,word_acro_array) ->
-
 #
 # This has been changed to a pure regex version,
 # this function will detect multi-words (e.g. Air Force)
 #
-highlight_word_acro_pairs = (text_content,word_acro_array) ->
+highlight_word_acro_pairs = (text_content,word_acro_array, tooltipped_words) ->
 	tooltipped_words = [];
+	#For every acronym that is in the word_acro dicctionary
 	for acronym in Object.keys word_acro_array
 		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
+		#Hardcoded case for &, change in future. &amp is html encoding for "&""
 		if acronym == "&amp;"
 			regex_acro = ///(#{acronym})///gim
-
+		#If the acronym is in the text
 		if regex_acro.test(text_content)
+			#if acronym is present in text, mark present
 			acro_flag = true
+			#For every possible interpretation of an acronym. i.e. 
+			#Interpretation for "msn" is ["mission", "missions"]
 			for spelled_word in word_acro_array[acronym]
 				regex_spelled = ///(\b#{spelled_word}(?![a-zA-Z<\"=]))///gim
+
+				#Passes true if the spelled out word is ALSO in the text_content.
+				#This if statement will only be true if both the acronym AND the 
+				#spelled out version is in the text. 
 				if regex_spelled.test(text_content)
 					acro_flag = false
-					text_content = text_content.replace regex_acro, '<span id="'+acronym+spelled_word+'" class="acro_pair">$&</span>'
-					text_content = text_content.replace regex_spelled, '<span id="'+spelled_word+acronym+'" class="acro_pair">$&</span>'
-					tooltipped_words.push([acronym,spelled_word])
+					#Replace the contents
+
+					#These are hashed because html id's 
+					#cannot have invalid characters "/" or spaces
+					#Cuts off last two chars, which are equal signs
+					hash_pair1 = btoa(acronym+spelled_word)
+					hash_pair1 = hash_pair1.slice(0,-2)
+					hash_pair2 = btoa(spelled_word+acronym)
+					hash_pair2 = hash_pair2.slice(0,-2)
+
+					tooltipped_words[hash_pair1] = spelled_word
+					tooltipped_words[hash_pair2] = acronym
+					text_content = text_content.replace regex_acro, '<span id="'+hash_pair1+'" class="acro_pair">$&</span>'
+					text_content = text_content.replace regex_spelled, '<span id="'+hash_pair2+'" class="acro_pair">$&</span>'
 			if acro_flag
 				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
 	return {"html":text_content, "tooltipped_words":tooltipped_words}
@@ -105,12 +61,12 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 add_tooltip_custom = (selector, msg) ->
 	tippy(selector, {content:msg,flip:false})
 	return
-add_tooltips = (acronym_words) ->
-	for pair in acronym_words
-		add_tooltip_custom('#'+pair[0]+pair[1],"Change to: " +pair[1])
-		add_tooltip_custom('#'+pair[1]+pair[0],"Change to: " +pair[0])
+	
+add_tooltips = (tooltipped_words) ->
+	for hash in Object.keys(tooltipped_words)
+		add_tooltip_custom('#'+hash,"Inconsistent with: " +tooltipped_words[hash])
+		add_tooltip_custom('#'+hash,"Inconsistent with: " +tooltipped_words[hash])
 	return
-
 highlight_valid_acros = (text_content, word_acro_array) ->
 	acronym_array = Object.keys word_acro_array
 	text_array = text_content.split(" ")
@@ -121,13 +77,39 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 		
 	return text_content
 
-queep= ->
+exclamation_check = (text_content) ->
+    # This regex expression matches with an "!" that is NOT
+	#followed by 2 spaces and a non-whitespace character.
+	#All "!" characters must be followed by 2 spaces and a 
+	#non-whitespace character
+	#
+	#It will not match a "!" followed by a newline character.
+	regex_exclam = ///!(?!(\ \ \S)|$)///gm
+	text_content = text_content.replace(regex_exclam,'<span class="invalid_exclamation">$&</span>')
+	return text_content
 
+double_dash_check = (text_content) ->
+	regex_double_dash_append = ///--(?=\s)///gm
+	regex_double_dash_precede = ///\s--///gm
+
+	text_content  = text_content.replace(regex_double_dash_append,'<span class="invalid_double_dash">$&</span>')
+	text_content = text_content.replace(regex_double_dash_precede,'<span class="invalid_double_dash">$&</span>')
+	
+	return text_content
+
+
+tooltipped_words = {}
+queep = ->
 	text_content = $('#output').html()
-	result = highlight_word_acro_pairs(text_content,word_acro_data)
+	result = highlight_word_acro_pairs(text_content,word_acro_data, tooltipped_words)
+	text_content = result['html']
+	text_content = exclamation_check(text_content)
+	text_content = double_dash_check(text_content)
+	result['html'] = text_content
 	return result # returning: {'html': text_content, 'tooltipped_words':[]}
 
 $ ->
+	
 	$("#input").on "input propertychange paste", ->
 		#Adds the text you type in, to the output. 
 		$('#output').text $('#input').val()
@@ -136,4 +118,6 @@ $ ->
 		$('#output').html result['html']
 		add_tooltips(result['tooltipped_words'])
 		add_tooltip_custom(".acro_green", "Approved abbreviation")
+		add_tooltip_custom(".invalid_double_dash", "Error: Whitespace next to '--'")
+		add_tooltip_custom(".invalid_exclamation", "2 spaces must appear after a '!'")
 		return

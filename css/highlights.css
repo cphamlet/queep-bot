@@ -6,7 +6,7 @@ span.dupe:hover {
 	background-color: blue;
 }
 
-span.acro_pair {
+span.acro_pair, span.invalid_exclamation, span.invalid_double_dash {
 	background-color: #ff4235;
 }
 
