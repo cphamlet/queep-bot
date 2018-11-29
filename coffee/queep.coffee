@@ -18,12 +18,14 @@ highlight_typos = (typos,text_content) ->
 # This has been changed to a pure regex version,
 # this function will detect multi-words (e.g. Air Force)
 #
-highlight_word_acro_pairs = (text_content,word_acro_array, tooltipped_words) ->
+highlight_word_acro_pairs = (text_content,word_acro_array) ->
 	tooltipped_words = [];
+	approved_acros = [];
 	#For every acronym that is in the word_acro dicctionary
 	for acronym in Object.keys word_acro_array
-		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=]))///gim
-		#Hardcoded case for &, change in future. &amp is html encoding for "&""
+		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=\']))///gim
+		#Hardcoded case for &, change in future. &amp is html encoding for "&"" 
+		#TODO, remove this
 		if acronym == "&amp;"
 			regex_acro = ///(#{acronym})///gim
 		#If the acronym is in the text
@@ -33,7 +35,7 @@ highlight_word_acro_pairs = (text_content,word_acro_array, tooltipped_words) ->
 			#For every possible interpretation of an acronym. i.e. 
 			#Interpretation for "msn" is ["mission", "missions"]
 			for spelled_word in word_acro_array[acronym]
-				regex_spelled = ///(\b#{spelled_word}(?![a-zA-Z<\"=]))///gim
+				regex_spelled = ///(\b#{spelled_word}(?![a-zA-Z<\"=\']))///gim
 
 				#Passes true if the spelled out word is ALSO in the text_content.
 				#This if statement will only be true if both the acronym AND the 
@@ -54,9 +56,12 @@ highlight_word_acro_pairs = (text_content,word_acro_array, tooltipped_words) ->
 					tooltipped_words[hash_pair2] = acronym
 					text_content = text_content.replace regex_acro, '<span id="'+hash_pair1+'" class="acro_pair">$&</span>'
 					text_content = text_content.replace regex_spelled, '<span id="'+hash_pair2+'" class="acro_pair">$&</span>'
+
 			if acro_flag
-				text_content = text_content.replace regex_acro, '<span id="'+acronym+'" class="acro_green">$&</span>'
-	return {"html":text_content, "tooltipped_words":tooltipped_words}
+				acro_id = btoa(acronym).slice(0,-2)
+				text_content = text_content.replace regex_acro, '<span id="'+acro_id+'" class="approved_acro">$&</span>'
+				approved_acros[acro_id] = acronym
+	return {"html":text_content, "tooltipped_words":tooltipped_words, "approved_acros":approved_acros}
 
 add_tooltip_custom = (selector, msg) ->
 	tippy(selector, {content:msg,flip:false})
@@ -65,7 +70,6 @@ add_tooltip_custom = (selector, msg) ->
 add_tooltips = (tooltipped_words) ->
 	for hash in Object.keys(tooltipped_words)
 		add_tooltip_custom('#'+hash,"Inconsistent with: " +tooltipped_words[hash])
-		add_tooltip_custom('#'+hash,"Inconsistent with: " +tooltipped_words[hash])
 	return
 highlight_valid_acros = (text_content, word_acro_array) ->
 	acronym_array = Object.keys word_acro_array
@@ -73,7 +77,7 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 	for acro in acronym_array
 		lower_word = acro.toLowerCase()
 		regex = ///(\b#{acro})(?=([\n\ \!\-/\;]|$))///gim
-		text_content = text_content.replace(regex,'<span id="'+acro+'" class="acro_green">$&</span>')
+		text_content = text_content.replace(regex,'<span id="'+acro+'" class="approved_acro">$&</span>')
 		
 	return text_content
 
@@ -98,26 +102,31 @@ double_dash_check = (text_content) ->
 	return text_content
 
 
-tooltipped_words = {}
 queep = ->
 	text_content = $('#output').html()
-	result = highlight_word_acro_pairs(text_content,word_acro_data, tooltipped_words)
+	result = highlight_word_acro_pairs(text_content,word_acro_data)
 	text_content = result['html']
 	text_content = exclamation_check(text_content)
 	text_content = double_dash_check(text_content)
 	result['html'] = text_content
-	return result # returning: {'html': text_content, 'tooltipped_words':[]}
+	return result # returning: {'html': text_content, 'tooltipped_words':[], 'approved_acros':[]}
 
 $ ->
 	
-	$("#input").on "input propertychange paste", ->
+	$("#input-text").on "input propertychange paste", ->
 		#Adds the text you type in, to the output. 
-		$('#output').text $('#input').val()
-
+		$('#output').text $('#input-text').val()
 		result = queep()
 		$('#output').html result['html']
 		add_tooltips(result['tooltipped_words'])
-		add_tooltip_custom(".acro_green", "Approved abbreviation")
+
+
+		approved_acros = result['approved_acros']
+		#For every approved acronym, reveal the spelled word in the UI
+		for acro_elem in Object.keys(approved_acros)
+			add_tooltip_custom("#"+acro_elem, "Abbreviates to: "+word_acro_data[approved_acros[acro_elem]][0])
+		
+		
 		add_tooltip_custom(".invalid_double_dash", "Error: Whitespace next to '--'")
 		add_tooltip_custom(".invalid_exclamation", "2 spaces must appear after a '!'")
 		return

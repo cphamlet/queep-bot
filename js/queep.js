@@ -5,7 +5,7 @@
 
   TODO: tie together elements from the same array
   */
-  var add_tooltip_custom, add_tooltips, double_dash_check, exclamation_check, highlight_dupes, highlight_typos, highlight_valid_acros, highlight_word_acro_pairs, queep, tooltipped_words;
+  var add_tooltip_custom, add_tooltips, double_dash_check, exclamation_check, highlight_dupes, highlight_typos, highlight_valid_acros, highlight_word_acro_pairs, queep;
 
   highlight_dupes = function(duplicate_acronyms, text_content) {
     var acronym, acronym_list, i, j, len, len1;
@@ -32,14 +32,16 @@
   // This has been changed to a pure regex version,
   // this function will detect multi-words (e.g. Air Force)
 
-  highlight_word_acro_pairs = function(text_content, word_acro_array, tooltipped_words) {
-    var acro_flag, acronym, hash_pair1, hash_pair2, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word;
+  highlight_word_acro_pairs = function(text_content, word_acro_array) {
+    var acro_flag, acro_id, acronym, approved_acros, hash_pair1, hash_pair2, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word, tooltipped_words;
     tooltipped_words = [];
+    approved_acros = [];
     ref = Object.keys(word_acro_array);
     for (i = 0, len = ref.length; i < len; i++) {
       acronym = ref[i];
-      regex_acro = RegExp(`(\\b${acronym}(?![a-zA-Z<"=]))`, "gim");
-      //Hardcoded case for &, change in future. &amp is html encoding for "&""
+      regex_acro = RegExp(`(\\b${acronym}(?![a-zA-Z<"=\\']))`, "gim");
+      //Hardcoded case for &, change in future. &amp is html encoding for "&"" 
+      //TODO, remove this
       if (acronym === "&amp;") {
         regex_acro = RegExp(`(${acronym})`, "gim");
       }
@@ -52,7 +54,7 @@
         //Interpretation for "msn" is ["mission", "missions"]
         for (j = 0, len1 = ref1.length; j < len1; j++) {
           spelled_word = ref1[j];
-          regex_spelled = RegExp(`(\\b${spelled_word}(?![a-zA-Z<"=]))`, "gim");
+          regex_spelled = RegExp(`(\\b${spelled_word}(?![a-zA-Z<"=\\']))`, "gim");
           //Passes true if the spelled out word is ALSO in the text_content.
           //This if statement will only be true if both the acronym AND the 
           //spelled out version is in the text. 
@@ -74,13 +76,16 @@
           }
         }
         if (acro_flag) {
-          text_content = text_content.replace(regex_acro, '<span id="' + acronym + '" class="acro_green">$&</span>');
+          acro_id = btoa(acronym).slice(0, -2);
+          text_content = text_content.replace(regex_acro, '<span id="' + acro_id + '" class="approved_acro">$&</span>');
+          approved_acros[acro_id] = acronym;
         }
       }
     }
     return {
       "html": text_content,
-      "tooltipped_words": tooltipped_words
+      "tooltipped_words": tooltipped_words,
+      "approved_acros": approved_acros
     };
   };
 
@@ -97,7 +102,6 @@
     for (i = 0, len = ref.length; i < len; i++) {
       hash = ref[i];
       add_tooltip_custom('#' + hash, "Inconsistent with: " + tooltipped_words[hash]);
-      add_tooltip_custom('#' + hash, "Inconsistent with: " + tooltipped_words[hash]);
     }
   };
 
@@ -109,7 +113,7 @@
       acro = acronym_array[i];
       lower_word = acro.toLowerCase();
       regex = RegExp(`(\\b${acro})(?=([\\n \\!\\-/\\;]|$))`, "gim");
-      text_content = text_content.replace(regex, '<span id="' + acro + '" class="acro_green">$&</span>');
+      text_content = text_content.replace(regex, '<span id="' + acro + '" class="approved_acro">$&</span>');
     }
     return text_content;
   };
@@ -136,28 +140,32 @@
     return text_content;
   };
 
-  tooltipped_words = {};
-
   queep = function() {
     var result, text_content;
     text_content = $('#output').html();
-    result = highlight_word_acro_pairs(text_content, word_acro_data, tooltipped_words);
+    result = highlight_word_acro_pairs(text_content, word_acro_data);
     text_content = result['html'];
     text_content = exclamation_check(text_content);
     text_content = double_dash_check(text_content);
     result['html'] = text_content;
-    return result; // returning: {'html': text_content, 'tooltipped_words':[]}
+    return result; // returning: {'html': text_content, 'tooltipped_words':[], 'approved_acros':[]}
   };
 
   $(function() {
-    return $("#input").on("input propertychange paste", function() {
-      var result;
+    return $("#input-text").on("input propertychange paste", function() {
+      var acro_elem, approved_acros, i, len, ref, result;
       //Adds the text you type in, to the output. 
-      $('#output').text($('#input').val());
+      $('#output').text($('#input-text').val());
       result = queep();
       $('#output').html(result['html']);
       add_tooltips(result['tooltipped_words']);
-      add_tooltip_custom(".acro_green", "Approved abbreviation");
+      approved_acros = result['approved_acros'];
+      ref = Object.keys(approved_acros);
+      //For every approved acronym, reveal the spelled word in the UI
+      for (i = 0, len = ref.length; i < len; i++) {
+        acro_elem = ref[i];
+        add_tooltip_custom("#" + acro_elem, "Abbreviates to: " + word_acro_data[approved_acros[acro_elem]][0]);
+      }
       add_tooltip_custom(".invalid_double_dash", "Error: Whitespace next to '--'");
       add_tooltip_custom(".invalid_exclamation", "2 spaces must appear after a '!'");
     });
