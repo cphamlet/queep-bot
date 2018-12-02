@@ -256,7 +256,7 @@ var word_acro_data = {
     "nat'l": ["national", "natl"],
     "natl": ["nat'l", "national"],
     "neg": ["negative"],
-    "no.": ["#", "number"],
+    "no\\.": ["#", "number"],
     "norm": ["normal"],
     "nov": ["november"],
     "obj": ["object", "objects"],
