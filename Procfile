@@ -1,1 +1,1 @@
-web: bundle exec rackup -p $PORT
+web: node index.js

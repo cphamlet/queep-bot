@@ -1,36 +1,39 @@
-Queep Bot
-===========
+# node-js-getting-started
 
-This is a project built originally for the 41st Flying Training Squadron at Columbus AFB MS. URL: https://queep-bot.herokuapp.com
+A barebones Node.js app using [Express 4](http://expressjs.com/).
 
-TODO: Purpose, explanation, ect. 
+This application supports the [Getting Started with Node on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs) article - check it out.
 
+## Running Locally
 
-Usage
------
+Make sure you have [Node.js](http://nodejs.org/) and the [Heroku CLI](https://cli.heroku.com/) installed.
 
-Run the app locally:
+```sh
+$ git clone https://github.com/heroku/node-js-getting-started.git # or clone your own fork
+$ cd node-js-getting-started
+$ npm install
+$ npm start
+```
 
-1. `gem install bundler`
-2. `bundle install`
-3. `bundle exec rackup`
-4. Visit <http://localhost:9292>
+Your app should now be running on [localhost:5000](http://localhost:5000/).
 
-Push it to your [Heroku](http://heroku.com) account:
+## Deploying to Heroku
 
-1. `gem install heroku`
-2. `heroku login`
-3. `heroku create --stack=cedar mynewapp`
-4. `heroku git:clone -a mynewapp`
-5. `git add .`
-6. `git commit -am "make it better"`
-7. `git push heroku master`
+```
+$ heroku create
+$ git push heroku master
+$ heroku open
+```
+or
 
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
+## Documentation
 
-License
--------
+For more information about using Node.js on Heroku, see these Dev Center articles:
 
-&copy; copyfree 2012 [Jamie Dubs](http://jamiedubs.com).
-This source code made freely available under an [MIT License](http://www.opensource.org/licenses/mit-license.php).
-
+- [Getting Started with Node.js on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
+- [Heroku Node.js Support](https://devcenter.heroku.com/articles/nodejs-support)
+- [Node.js on Heroku](https://devcenter.heroku.com/categories/nodejs)
+- [Best Practices for Node.js Development](https://devcenter.heroku.com/articles/node-best-practices)
+- [Using WebSockets on Heroku with Node.js](https://devcenter.heroku.com/articles/node-websockets)
