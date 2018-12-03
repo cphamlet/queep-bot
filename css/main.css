@@ -33,8 +33,11 @@ body{
     padding: 0.5em;
     margin-top:1em;
 }
+
 #input-text{
     white-space: pre;
+    background-color:white;
+    height:10em;
 }
 #output{
     min-height: 2.5em;
@@ -52,57 +55,3 @@ body{
     margin-top:1em;
     margin-bottom:1em;
 }
-/*Animation for file upload*/
-.snack-wrap {
-    display:block;
-    position:fixed;
-    top:30%;
-    left:50%;
-    margin-top:-35px;
-    margin-left:-81px;
-    padding:0px;
-  }
-  
-  .snackbar {
-    display:block;
-    background:#4CAF50;
-    border:#f2f2f2;
-    padding:10px 20px 10px 20px;
-    border-radius:5px;
-    color:#fff;
-    font-family:Arial;
-    position:relative;
-    transition: bottom 0.2s ease-in-out;
-    z-index:9;
-    opacity:0;
-  }
-  .snackclose, #snack_lab{
-    position:absolute;
-    border:0;
-  }
-  .snackclose {
-    display:none;
-    z-index:10;
-  }
-  #snack_lab {
-    z-index:11;
-    display:block;
-    width:100%;
-    height:100%;
-    color:rgba(255,255,255,0.8);
-    cursor:pointer;
-  }
-  .animateme {
-    animation-name: snackbar-show;
-    animation-duration: 2.5s;
-    animation-direction: forwards;
-    animation-timing-function: linear;
-    animation-delay:0s;
-    animation-fill-mode: initial;
-  }
-  @keyframes snackbar-show {
-     0%{ opacity:0; }
-    40%{opacity:0.9;}
-    60%{opacity:0.9;}
-     100% {opacity:0; }
-  }

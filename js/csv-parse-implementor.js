@@ -43,10 +43,6 @@ function csvToJSON(csv_data){
 }
 
 function triggerAnimation(){
-    var el = document.getElementById("animatable");
-    el.classList.remove("animateme");
-    el.offsetHeight; /* trigger reflow */
-    el.classList.add("animateme");
-    $("#fileUpload").replaceWith($("#fileUpload").val('').clone(true));
+    M.toast({html: 'CSV Uploaded Sucessfully! &#x2713;'});
     return;
 }
