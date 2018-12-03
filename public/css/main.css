@@ -29,23 +29,24 @@ body{
 }
 #input-text, #output{
     font-family:times-new-roman;
-    font-size:18px;
+    font-size:1.1em;
     padding: 0.5em;
     margin-top:1em;
 }
 
 #input-text{
     white-space: pre;
+    width:52em;
     background-color:white;
     height:10em;
 }
 #output{
     min-height: 2.5em;
+    width:52em;
     word-wrap: break-word;
     background:white;
     border-radius: 5px;
     box-shadow: 3px 2px 4px grey;
-    cursor: pointer;
 }
 #title, #title-text{
     margin-bottom:1em;
