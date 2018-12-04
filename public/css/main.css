@@ -28,6 +28,7 @@ body{
     padding-top:1em;
 }
 #input-text, #output{
+    width:51em;
     font-family:times-new-roman;
     font-size:1.1em;
     padding: 0.5em;
@@ -36,13 +37,11 @@ body{
 
 #input-text{
     white-space: pre;
-    width:52em;
     background-color:white;
     height:10em;
 }
 #output{
     min-height: 2.5em;
-    width:52em;
     word-wrap: break-word;
     background:white;
     border-radius: 5px;
