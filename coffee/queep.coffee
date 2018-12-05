@@ -6,12 +6,12 @@ TODO: tie together elements from the same array
 highlight_dupes = (duplicate_acronyms, text_content) ->
 	for acronym_list in duplicate_acronyms
 		for acronym in acronym_list
-			text_content = text_content.replace ///(?<=[^a-zA-Z]|^)#{acronym}(?=([^a-zA-Z]|$))///gi,'<span class="dupe">'+acronym+'</span>'
+			text_content = text_content.replace(RegExp('(?<=[^a-zA-Z]|^)' + acronym + '(?=([^a-zA-Z]|$))', "gi"), '<span class="dupe">' + acronym + '</span>');
 	return text_content
-
+  
 highlight_typos = (typos,text_content) ->
 	for typo in typos
-		text_content = text_content.replace ///(?<=[^a-zA-Z]|^)#{typo}(?=([^a-zA-Z]|$))///gi,'<span class="typo">'+typo+'</span>'
+		text_content = text_content.replace(RegExp('(?<=[^a-zA-Z]|^)' + typo + '(?=([^a-zA-Z]|$))', "gi"), '<span class="typo">' + typo + '</span>');
 	return text_content
 
 #
@@ -23,11 +23,11 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 	approved_acros = [];
 	#For every acronym that is in the word_acro dicctionary
 	for acronym in Object.keys word_acro_array
-		regex_acro = ///(\b#{acronym}(?![a-zA-Z<\"=\']))///gim
+		regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<"=\\\']))', "gim"); 
 		#Hardcoded case for &, change in future. &amp is html encoding for "&"" 
 		#TODO, remove this
 		if acronym == "&amp;"
-			regex_acro = ///(#{acronym})///gim
+			regex_acro = RegExp('(' + acronym + ')', "gim");
 		#If the acronym is in the text
 		if regex_acro.test(text_content)
 			#if acronym is present in text, mark present
@@ -35,7 +35,7 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 			#For every possible interpretation of an acronym. i.e. 
 			#Interpretation for "msn" is ["mission", "missions"]
 			for spelled_word in word_acro_array[acronym]
-				regex_spelled = ///(\b#{spelled_word}(?![a-zA-Z<\"=\']))///gim
+				regex_spelled = RegExp('(\\b' + spelled_word + '(?![a-zA-Z<"=\\\']))', "gim"); #Passes true if the spelled out word is ALSO in the text_content.
 
 				#Passes true if the spelled out word is ALSO in the text_content.
 				#This if statement will only be true if both the acronym AND the 
@@ -43,7 +43,6 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 				if regex_spelled.test(text_content)
 					acro_flag = false
 					#Replace the contents
-
 					#These are hashed because html id's 
 					#cannot have invalid characters "/" or spaces
 					#Cuts off last two chars, which are equal signs
@@ -76,7 +75,7 @@ highlight_valid_acros = (text_content, word_acro_array) ->
 	text_array = text_content.split(" ")
 	for acro in acronym_array
 		lower_word = acro.toLowerCase()
-		regex = ///(\b#{acro})(?=([\n\ \!\-/\;]|$))///gim
+		regex = RegExp('(\\b' + acro + ')(?=([\\n \\!\\-/\\;]|$))', "gim");
 		text_content = text_content.replace(regex,'<span id="'+acro+'" class="approved_acro">$&</span>')
 		
 	return text_content

@@ -13,7 +13,7 @@
       acronym_list = duplicate_acronyms[i];
       for (j = 0, len1 = acronym_list.length; j < len1; j++) {
         acronym = acronym_list[j];
-        text_content = text_content.replace(RegExp(`(?<=[^a-zA-Z]|^)${acronym}(?=([^a-zA-Z]|$))`, "gi"), '<span class="dupe">' + acronym + '</span>');
+        text_content = text_content.replace(RegExp('(?<=[^a-zA-Z]|^)' + acronym + '(?=([^a-zA-Z]|$))', "gi"), '<span class="dupe">' + acronym + '</span>');
       }
     }
     return text_content;
@@ -23,7 +23,7 @@
     var i, len, typo;
     for (i = 0, len = typos.length; i < len; i++) {
       typo = typos[i];
-      text_content = text_content.replace(RegExp(`(?<=[^a-zA-Z]|^)${typo}(?=([^a-zA-Z]|$))`, "gi"), '<span class="typo">' + typo + '</span>');
+      text_content = text_content.replace(RegExp('(?<=[^a-zA-Z]|^)' + typo + '(?=([^a-zA-Z]|$))', "gi"), '<span class="typo">' + typo + '</span>');
     }
     return text_content;
   };
@@ -39,13 +39,10 @@
     ref = Object.keys(word_acro_array);
     for (i = 0, len = ref.length; i < len; i++) {
       acronym = ref[i];
-      regex_acro = RegExp(`(\\b${acronym}(?![a-zA-Z<"=\\']))`, "gim");
-      //Hardcoded case for &, change in future. &amp is html encoding for "&"" 
-      //TODO, remove this
+      regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<"=\\\']))', "gim");
       if (acronym === "&amp;") {
-        regex_acro = RegExp(`(${acronym})`, "gim");
+        regex_acro = RegExp('(' + acronym + ')', "gim");
       }
-      //If the acronym is in the text
       if (regex_acro.test(text_content)) {
         //if acronym is present in text, mark present
         acro_flag = true;
@@ -54,14 +51,10 @@
         //Interpretation for "msn" is ["mission", "missions"]
         for (j = 0, len1 = ref1.length; j < len1; j++) {
           spelled_word = ref1[j];
-          regex_spelled = RegExp(`(\\b${spelled_word}(?![a-zA-Z<"=\\']))`, "gim");
-          //Passes true if the spelled out word is ALSO in the text_content.
-          //This if statement will only be true if both the acronym AND the 
-          //spelled out version is in the text. 
+          regex_spelled = RegExp('(\\b' + spelled_word + '(?![a-zA-Z<"=\\\']))', "gim");
           if (regex_spelled.test(text_content)) {
             acro_flag = false;
             //Replace the contents
-
             //These are hashed because html id's 
             //cannot have invalid characters "/" or spaces
             //Cuts off last two chars, which are equal signs
@@ -112,7 +105,7 @@
     for (i = 0, len = acronym_array.length; i < len; i++) {
       acro = acronym_array[i];
       lower_word = acro.toLowerCase();
-      regex = RegExp(`(\\b${acro})(?=([\\n \\!\\-/\\;]|$))`, "gim");
+      regex = RegExp('(\\b' + acro + ')(?=([\\n \\!\\-/\\;]|$))', "gim");
       text_content = text_content.replace(regex, '<span id="' + acro + '" class="approved_acro">$&</span>');
     }
     return text_content;
