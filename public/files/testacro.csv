@@ -4,14 +4,14 @@ Approved Acronyms,Will match inconsistently with:
 1st lt,first lieutenant
 a/c,aircraft
 ab,air base
-acad,academy
+acad,"academy,academic"
 accom,"accommodate,accomodation,accompanied,accompany"
 accomp,accomplish
 acct,account
 acft,aircraft
 ack,acknowledge
 ad,active duty
-add�l,additional
+"add'l",additional
 adet,national security agency associate directorate of education and training
 admin,administrate
 adpe,automated data processing equipment
@@ -170,7 +170,7 @@ gnd,ground
 gov't,government
 govt,government
 gp,"group,grp,grps,groups"
-gpa,grade point average
+gpa,"grade point average"
 gps,groups
 grad,graduate
 grp,"group,groups,gps,gp"
@@ -419,3 +419,4 @@ wt,weight
 wx,weather
 yr,"year,years"
 yrs,"years,year"
+
