@@ -13,7 +13,8 @@ $(function () {
             },
             //Executes before the file is parsed
             before: function before(file, inputElem) {
-                if (!file || !file.name.endsWith(".csv")) {
+                console.log(file);
+                if (!file || !file.name.slice(-4)==".csv") {
                     return { action: "abort", reason: "Invalid file, use a CSV file." };
                 }
             },
@@ -30,11 +31,11 @@ function csvToJSON(csv_data) {
     console.log("Load complete");
     word_acro_data = {};
     for (var i = 1; i < csv_data.length - 1; i++) {
-        var acronym = csv_data[i][0];
+        let acronym = csv_data[i][0];
         acronym = $("<div />").text(acronym).html();
         //TODO, if the spelled out word has a special html char, it will not be 
         //imported properly, need to escape
-        var spelledOutWords = csv_data[i][1].split(",");
+        let spelledOutWords = csv_data[i][1].split(",");
         word_acro_data[acronym] = spelledOutWords;
     }
 
