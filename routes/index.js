@@ -7,21 +7,23 @@ router.get('/', function(req, res, next) {
   res.render('pages/index');
 });
 
+router.get('/contactus', function(req,res){
+    res.render('pages/contactus');
+});
+
 router.post('/contact', function(req, res) {
-  let status = sendMail(req, function(status){
+ let status = sendMail(req, function(status){
     if(status==202){
-        res.send({sucess:1});
+        res.json({success:1});
     }else{
-        res.send({success:0});
+        res.json({success:0});
     }
-  });
+ });
   
 });
 
-
-
 function sendMail(req, callback){
-    let [replyTo,subject,mailtext] = [req.body.replyTo, req.body.subject, req.body.mailtext];
+    let [name, replyTo, mailtext] = [req.body.name, req.body.replyTo, req.body.mailtext];
     let request = sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
@@ -33,7 +35,7 @@ function sendMail(req, callback){
                   email: 'cphamlet@protonmail.com',
                 },
               ],
-              subject: subject,
+              subject: 'QueepBot: Question From '+ name,
             },
           ],
           reply_to:{
