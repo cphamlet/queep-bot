@@ -1,7 +1,7 @@
 <html>
 <head>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,300,600,400italic);
 * {
@@ -80,6 +80,7 @@ fieldset {
   border: 1px solid #ccc;
   background: #FFF;
   margin: 0 0 5px;
+  padding-left: 0.5em;
 }
 
 #contact input[type="text"]:hover,
@@ -155,6 +156,7 @@ input:not([type]), input[type=text]:not(.browser-default), input[type=password]:
 <body>
 <div class="container">  
   <form id="contact" action="/contact" method="post">
+    <a href="/"><i class="material-icons" id="back_btn" href="/">arrow_back</i></a>
     <h3>Contact Queep Bot Team</h3>
     <h4>Please leave any feedback or questions in the form below and we will get back with you.</h4>
     <fieldset>
@@ -190,11 +192,16 @@ input:not([type]), input[type=text]:not(.browser-default), input[type=password]:
 
       http.onreadystatechange = function() {//Call a function when the state changes.
           let data = JSON.parse(http.responseText);
-          if(http.readyState == 4 && http.status == 200 && data['success']==1) {
-            M.toast({html: 'Email Sent!'});
-            document.getElementById("name").value = "";
-            document.getElementById("mailtext").value="";
-            document.getElementById("replyTo").value = "";
+          if(http.readyState == 4 && http.status == 200) {
+            if(data['success']==1){
+                M.toast({html: 'Email Sent!'});
+              document.getElementById("name").value = "";
+              document.getElementById("mailtext").value="";
+              document.getElementById("replyTo").value = "";
+            }else{
+              M.toast({html: 'Email Failed To Send'});
+            }
+
           }
       }
       http.send(params);

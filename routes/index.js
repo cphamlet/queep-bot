@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-var helper = require('sendgrid').mail;
 var sg = require('sendgrid')(process.env.SENDGRID_API_KEY || "");
 
 router.get('/', function(req, res, next) {
@@ -32,10 +31,10 @@ function sendMail(req, callback){
             {
               to: [
                 {
-                  email: 'cphamlet@protonmail.com',
+                  email: 'connor.p.hamlet@gmail.com',
                 },
               ],
-              subject: 'QueepBot: Question From '+ name,
+              subject: 'QueepBot Question: '+ name,
             },
           ],
           reply_to:{
