@@ -1,0 +1,10 @@
+{
+  "presets": [
+    ["env", {
+      "targets": {
+        // The % refers to the global coverage of users from browserslist
+        "browsers": [ "ie 11"]
+      }
+    }, "minify"]
+  ]
+}

@@ -1,19 +1,3 @@
-###
-highlights all items in the array passed to it
-
-TODO: tie together elements from the same array
-###
-highlight_dupes = (duplicate_acronyms, text_content) ->
-	for acronym_list in duplicate_acronyms
-		for acronym in acronym_list
-			text_content = text_content.replace(RegExp('(?<=[^a-zA-Z]|^)' + acronym + '(?=([^a-zA-Z]|$))', "gi"), '<span class="dupe">' + acronym + '</span>');
-	return text_content
-  
-highlight_typos = (typos,text_content) ->
-	for typo in typos
-		text_content = text_content.replace(RegExp('(?<=[^a-zA-Z]|^)' + typo + '(?=([^a-zA-Z]|$))', "gi"), '<span class="typo">' + typo + '</span>');
-	return text_content
-
 #
 # This has been changed to a pure regex version,
 # this function will detect multi-words (e.g. Air Force)
@@ -129,3 +113,5 @@ $ ->
 		add_tooltip_custom(".invalid_double_dash", "Error: Whitespace next to '--'")
 		add_tooltip_custom(".invalid_exclamation", "2 spaces must appear after a '!'")
 		return
+
+

@@ -31,11 +31,15 @@ function csvToJSON(csv_data) {
     console.log("Load complete");
     word_acro_data = {};
     for (var i = 1; i < csv_data.length - 1; i++) {
-        let acronym = csv_data[i][0];
+        let acronym = RegExp.escape(csv_data[i][0]);
+
         acronym = $("<div />").text(acronym).html();
         //TODO, if the spelled out word has a special html char, it will not be 
         //imported properly, need to escape
         let spelledOutWords = csv_data[i][1].split(",");
+        for(let i in spelledOutWords){
+            spelledOutWords[i] = RegExp.escape(spelledOutWords[i]);
+        }
         word_acro_data[acronym] = spelledOutWords;
     }
 
@@ -46,3 +50,24 @@ function triggerAnimation() {
     M.toast({html: 'CSV Uploaded Sucessfully! &#x2713;'});
     return;
 }
+
+RegExp.escape = (S) => {
+    // 1. let str be ToString(S).
+    // 2. ReturnIfAbrupt(str).
+    let str = String(S);
+    // 3. Let cpList be a List containing in order the code
+    // points as defined in 6.1.4 of str, starting at the first element of str.
+    let cpList = Array.from(str[Symbol.iterator]());
+    // 4. let cuList be a new List
+    let cuList = [];
+    // 5. For each code point c in cpList in List order, do:
+    for(let c of cpList){
+      if("^$\\.*+?()[]{}|".indexOf(c) !== -1){
+        cuList.push("\\");
+      }
+      cuList.push(c);
+    }
+    //6. Let L be a String whose elements are, in order, the elements of cuList.
+    let L = cuList.join("");
+    return L;
+  };
