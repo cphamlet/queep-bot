@@ -12,6 +12,7 @@ Make sure you have [Node.js](http://nodejs.org/) and the [Heroku CLI](https://cl
 $ git clone https://github.com/heroku/node-js-getting-started.git # or clone your own fork
 $ cd node-js-getting-started
 $ npm install
+$ npm run build #compiles CoffeeScript files, adds to Babel for IE comopatibility
 $ npm start
 ```
 
