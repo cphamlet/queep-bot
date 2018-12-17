@@ -11,7 +11,6 @@ $(function () {
             },
             //Executes before the file is parsed
             before: function before(file, inputElem) {
-                console.log(file);
                 if (!file || !file.name.slice(-4)==".csv") {
                     return { action: "abort", reason: "Invalid file, use a CSV file." };
                 }

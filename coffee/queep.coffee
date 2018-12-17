@@ -3,7 +3,6 @@
 # this function will detect multi-words (e.g. Air Force)
 #
 highlight_word_acro_pairs = (text_content,word_acro_array) ->
-	console.log(text_content);
 	# esc = RegExp('&#x[A-F0-9]{1,4};(?!<)', "gim");
 	# text_content = text_content.replace esc, '<span class="unicode">$&</span>'
 	tooltipped_words = [];
@@ -47,7 +46,6 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 				acro_id = btoa(acronym).slice(0,-2)
 				text_content = text_content.replace regex_acro, '<span id="'+acro_id+'" class="approved_acro">$&</span>'
 				approved_acros[acro_id] = acronym
-	console.log(text_content);
 	return {"html":text_content, "tooltipped_words":tooltipped_words, "approved_acros":approved_acros}
 
 add_tooltip_custom = (selector, msg) ->
@@ -75,7 +73,7 @@ exclamation_check = (text_content) ->
 	#non-whitespace character
 	#
 	#It will not match a "!" followed by a newline character.
-	regex_exclam = ///!(?!(\ \ \S)|$)///gm
+	regex_exclam = ///!(?!(\ \ \S)|\ {0,}$)///gm
 	text_content = text_content.replace(regex_exclam,'<span class="invalid_exclamation">$&</span>')
 	return text_content
 
@@ -88,6 +86,11 @@ double_dash_check = (text_content) ->
 	
 	return text_content
 
+#Semi-colon must have exactly 1 space after it
+semi_colon_space_check = (text_content) ->
+	regex_exclam = ///;(?!(\ \S)|\ {0,}$)///gm
+	text_content = text_content.replace(regex_exclam,'<span class="invalid_semi_colon">$&</span>')
+	return text_content
 
 queep = ->
 	text_content = $('#output').text()
@@ -96,6 +99,7 @@ queep = ->
 	text_content = result['html']
 	text_content = exclamation_check(text_content)
 	text_content = double_dash_check(text_content)
+	text_content = semi_colon_space_check(text_content)
 	result['html'] = text_content
 	return result # returning: {'html': text_content, 'tooltipped_words':[], 'approved_acros':[]}
 
@@ -116,7 +120,8 @@ $ ->
 		
 		
 		add_tooltip_custom(".invalid_double_dash", "Error: Whitespace next to '--'")
-		add_tooltip_custom(".invalid_exclamation", "2 spaces must appear after a '!'")
+		add_tooltip_custom(".invalid_exclamation", "A '!' must have exactly 2 spaces after it")
+		add_tooltip_custom(".invalid_semi_colon", "A ';' must have exactly 1 space after it")
 		return
 
 

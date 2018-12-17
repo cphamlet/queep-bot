@@ -3,11 +3,12 @@
     // This has been changed to a pure regex version,
   // this function will detect multi-words (e.g. Air Force)
 
-  var add_tooltip_custom, add_tooltips, double_dash_check, exclamation_check, highlight_valid_acros, highlight_word_acro_pairs, queep;
+  var add_tooltip_custom, add_tooltips, double_dash_check, exclamation_check, highlight_valid_acros, highlight_word_acro_pairs, queep, semi_colon_space_check;
 
   highlight_word_acro_pairs = function(text_content, word_acro_array) {
     var acro_flag, acro_id, acronym, approved_acros, hash_pair1, hash_pair2, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word, tooltipped_words;
-    console.log(text_content);
+    // esc = RegExp('&#x[A-F0-9]{1,4};(?!<)', "gim");
+    // text_content = text_content.replace esc, '<span class="unicode">$&</span>'
     tooltipped_words = [];
     approved_acros = [];
     ref = Object.keys(word_acro_array);
@@ -49,7 +50,6 @@
         }
       }
     }
-    console.log(text_content);
     return {
       "html": text_content,
       "tooltipped_words": tooltipped_words,
@@ -94,7 +94,7 @@
     //non-whitespace character
 
     //It will not match a "!" followed by a newline character.
-    regex_exclam = /!(?!(  \S)|$)/gm;
+    regex_exclam = /!(?!(  \S)| {0,}$)/gm;
     text_content = text_content.replace(regex_exclam, '<span class="invalid_exclamation">$&</span>');
     return text_content;
   };
@@ -108,6 +108,14 @@
     return text_content;
   };
 
+  //Semi-colon must have exactly 1 space after it
+  semi_colon_space_check = function(text_content) {
+    var regex_exclam;
+    regex_exclam = /;(?!( \S)| {0,}$)/gm;
+    text_content = text_content.replace(regex_exclam, '<span class="invalid_semi_colon">$&</span>');
+    return text_content;
+  };
+
   queep = function() {
     var result, text_content;
     text_content = $('#output').text();
@@ -115,6 +123,7 @@
     text_content = result['html'];
     text_content = exclamation_check(text_content);
     text_content = double_dash_check(text_content);
+    text_content = semi_colon_space_check(text_content);
     result['html'] = text_content;
     return result; // returning: {'html': text_content, 'tooltipped_words':[], 'approved_acros':[]}
   };
@@ -135,7 +144,8 @@
         add_tooltip_custom("#" + acro_elem, "Abbreviates to: " + word_acro_data[approved_acros[acro_elem]][0]);
       }
       add_tooltip_custom(".invalid_double_dash", "Error: Whitespace next to '--'");
-      add_tooltip_custom(".invalid_exclamation", "2 spaces must appear after a '!'");
+      add_tooltip_custom(".invalid_exclamation", "A '!' must have exactly 2 spaces after it");
+      add_tooltip_custom(".invalid_semi_colon", "A ';' must have exactly 1 space after it");
     });
   });
 
