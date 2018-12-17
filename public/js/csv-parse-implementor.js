@@ -30,8 +30,6 @@ function csvToJSON(csv_data) {
     word_acro_data = {};
     for (var i = 1; i < csv_data.length - 1; i++) {
         let acronym = RegExp.escape(csv_data[i][0]);
-
-        acronym = $("<div />").text(acronym).html();
         //TODO, if the spelled out word has a special html char, it will not be 
         //imported properly, need to escape
         let spelledOutWords = csv_data[i][1].split(",");

@@ -7,13 +7,14 @@
 
   highlight_word_acro_pairs = function(text_content, word_acro_array) {
     var acro_flag, acro_id, acronym, approved_acros, hash_pair1, hash_pair2, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word, tooltipped_words;
+    console.log(text_content);
     tooltipped_words = [];
     approved_acros = [];
     ref = Object.keys(word_acro_array);
     for (i = 0, len = ref.length; i < len; i++) {
       acronym = ref[i];
       regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<"=\\\']))', "gim");
-      if (acronym === "&amp;") {
+      if (acronym === "&") {
         regex_acro = RegExp('(' + acronym + ')', "gim");
       }
       if (regex_acro.test(text_content)) {
@@ -48,6 +49,7 @@
         }
       }
     }
+    console.log(text_content);
     return {
       "html": text_content,
       "tooltipped_words": tooltipped_words,
@@ -74,7 +76,7 @@
   highlight_valid_acros = function(text_content, word_acro_array) {
     var acro, acronym_array, i, len, lower_word, regex, text_array;
     acronym_array = Object.keys(word_acro_array);
-    text_array = text_content.split(" ");
+    text_array = text_content.split(' ');
     for (i = 0, len = acronym_array.length; i < len; i++) {
       acro = acronym_array[i];
       lower_word = acro.toLowerCase();
@@ -108,7 +110,7 @@
 
   queep = function() {
     var result, text_content;
-    text_content = $('#output').html();
+    text_content = $('#output').text();
     result = highlight_word_acro_pairs(text_content, word_acro_data);
     text_content = result['html'];
     text_content = exclamation_check(text_content);

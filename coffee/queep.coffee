@@ -3,6 +3,9 @@
 # this function will detect multi-words (e.g. Air Force)
 #
 highlight_word_acro_pairs = (text_content,word_acro_array) ->
+	console.log(text_content);
+	# esc = RegExp('&#x[A-F0-9]{1,4};(?!<)', "gim");
+	# text_content = text_content.replace esc, '<span class="unicode">$&</span>'
 	tooltipped_words = [];
 	approved_acros = [];
 	#For every acronym that is in the word_acro dicctionary
@@ -10,7 +13,7 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 		regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<"=\\\']))', "gim"); 
 		#Hardcoded case for &, change in future. &amp is html encoding for "&"" 
 		#TODO, remove this
-		if acronym == "&amp;"
+		if acronym == "&"
 			regex_acro = RegExp('(' + acronym + ')', "gim");
 		#If the acronym is in the text
 		if regex_acro.test(text_content)
@@ -44,6 +47,7 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 				acro_id = btoa(acronym).slice(0,-2)
 				text_content = text_content.replace regex_acro, '<span id="'+acro_id+'" class="approved_acro">$&</span>'
 				approved_acros[acro_id] = acronym
+	console.log(text_content);
 	return {"html":text_content, "tooltipped_words":tooltipped_words, "approved_acros":approved_acros}
 
 add_tooltip_custom = (selector, msg) ->
@@ -56,7 +60,7 @@ add_tooltips = (tooltipped_words) ->
 	return
 highlight_valid_acros = (text_content, word_acro_array) ->
 	acronym_array = Object.keys word_acro_array
-	text_array = text_content.split(" ")
+	text_array = text_content.split(' ')
 	for acro in acronym_array
 		lower_word = acro.toLowerCase()
 		regex = RegExp('(\\b' + acro + ')(?=([\\n \\!\\-/\\;]|$))', "gim");
@@ -86,8 +90,9 @@ double_dash_check = (text_content) ->
 
 
 queep = ->
-	text_content = $('#output').html()
+	text_content = $('#output').text()
 	result = highlight_word_acro_pairs(text_content,word_acro_data)
+
 	text_content = result['html']
 	text_content = exclamation_check(text_content)
 	text_content = double_dash_check(text_content)
