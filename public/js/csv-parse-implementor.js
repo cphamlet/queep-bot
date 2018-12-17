@@ -1,5 +1,3 @@
-'use strict';
-
 $(function () {
     // Handler for .ready() called.
     $('#fileUpload').on("change", function () {
@@ -51,23 +49,23 @@ function triggerAnimation() {
     return;
 }
 
-RegExp.escape = (S) => {
+RegExp.escape = function(S){
     // 1. let str be ToString(S).
     // 2. ReturnIfAbrupt(str).
     let str = String(S);
     // 3. Let cpList be a List containing in order the code
     // points as defined in 6.1.4 of str, starting at the first element of str.
-    let cpList = Array.from(str[Symbol.iterator]());
+    let cpList = str.split('');
     // 4. let cuList be a new List
     let cuList = [];
     // 5. For each code point c in cpList in List order, do:
-    for(let c of cpList){
-      if("^$\\.*+?()[]{}|".indexOf(c) !== -1){
+    for(var i = 0; i<cpList.length; i++){
+      if("^$\\.*+?()[]{}|".indexOf(cpList[i]) !== -1){
         cuList.push("\\");
       }
-      cuList.push(c);
+      cuList.push(cpList[i]);
     }
     //6. Let L be a String whose elements are, in order, the elements of cuList.
     let L = cuList.join("");
     return L;
-  };
+  }
