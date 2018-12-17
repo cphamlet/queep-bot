@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "npx babel ./public/js/queep.js -o ./public/js/queep.min.js && npx babel ./public/js/csv-parse-implementor.js -o ./public/js/csv-parse-implementor.min.js",
+    "build": "coffee -o ./public/js/queep.js ./coffee/queep.coffee && npx babel ./public/js/queep.js -o ./public/js/queep.min.js && npx babel ./public/js/csv-parse-implementor.js -o ./public/js/csv-parse-implementor.min.js",
     "test": "node test.js"
   },
   "dependencies": {
