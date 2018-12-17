@@ -1,6 +1,6 @@
 var word_acro_data = {
     "#": ["number"],
-    "&": ["and"],
+    "&amp;": ["and"],
     "1st lt": ["first lieutenant"],
     "a/c": ["aircraft"],
     "ab": ["air base"],

@@ -3,19 +3,17 @@
     // This has been changed to a pure regex version,
   // this function will detect multi-words (e.g. Air Force)
 
-  var add_tooltip_custom, add_tooltips, double_dash_check, exclamation_check, highlight_valid_acros, highlight_word_acro_pairs, queep, semi_colon_space_check;
+  var add_tooltip_custom, add_tooltips, custom_encoder, double_dash_check, exclamation_check, highlight_valid_acros, highlight_word_acro_pairs, queep, semi_colon_space_check;
 
   highlight_word_acro_pairs = function(text_content, word_acro_array) {
     var acro_flag, acro_id, acronym, approved_acros, hash_pair1, hash_pair2, i, j, len, len1, ref, ref1, regex_acro, regex_spelled, spelled_word, tooltipped_words;
-    // esc = RegExp('&#x[A-F0-9]{1,4};(?!<)', "gim");
-    // text_content = text_content.replace esc, '<span class="unicode">$&</span>'
     tooltipped_words = [];
     approved_acros = [];
     ref = Object.keys(word_acro_array);
     for (i = 0, len = ref.length; i < len; i++) {
       acronym = ref[i];
-      regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<"=\\\']))', "gim");
-      if (acronym === "&") {
+      regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<;"=\\\']))', "gim");
+      if (acronym === "&amp;") {
         regex_acro = RegExp('(' + acronym + ')', "gim");
       }
       if (regex_acro.test(text_content)) {
@@ -26,7 +24,7 @@
         //Interpretation for "msn" is ["mission", "missions"]
         for (j = 0, len1 = ref1.length; j < len1; j++) {
           spelled_word = ref1[j];
-          regex_spelled = RegExp('(\\b' + spelled_word + '(?![a-zA-Z<"=\\\']))', "gim");
+          regex_spelled = RegExp('(\\b' + spelled_word + '(?![a-zA-Z<;"=\\\']))', "gim");
           if (regex_spelled.test(text_content)) {
             acro_flag = false;
             //Replace the contents
@@ -111,18 +109,20 @@
   //Semi-colon must have exactly 1 space after it
   semi_colon_space_check = function(text_content) {
     var regex_exclam;
-    regex_exclam = /;(?!( \S)| {0,}$)/gm;
+    regex_exclam = /;(?!( \S)| {0,}$|<)/gm;
     text_content = text_content.replace(regex_exclam, '<span class="invalid_semi_colon">$&</span>');
     return text_content;
   };
 
   queep = function() {
-    var result, text_content;
-    text_content = $('#output').text();
+    var esc, result, text_content;
+    text_content = he.escape($('#output').text());
     result = highlight_word_acro_pairs(text_content, word_acro_data);
     text_content = result['html'];
     text_content = exclamation_check(text_content);
     text_content = double_dash_check(text_content);
+    esc = RegExp('&[a-z]{2,4};(?!<)', "gim");
+    text_content = text_content.replace(esc, '<span class="html_entity">$&</span>');
     text_content = semi_colon_space_check(text_content);
     result['html'] = text_content;
     return result; // returning: {'html': text_content, 'tooltipped_words':[], 'approved_acros':[]}
@@ -148,5 +148,11 @@
       add_tooltip_custom(".invalid_semi_colon", "A ';' must have exactly 1 space after it");
     });
   });
+
+  custom_encoder = function(text_content) {
+    var enc, special_chars;
+    special_chars = ['<', '>', '&', '\''];
+    return enc = RegExp('(\\b' + acronym + '(?![a-zA-Z<;"=\\\']))', "gim");
+  };
 
 }).call(this);

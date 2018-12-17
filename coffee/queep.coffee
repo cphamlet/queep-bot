@@ -3,16 +3,15 @@
 # this function will detect multi-words (e.g. Air Force)
 #
 highlight_word_acro_pairs = (text_content,word_acro_array) ->
-	# esc = RegExp('&#x[A-F0-9]{1,4};(?!<)', "gim");
-	# text_content = text_content.replace esc, '<span class="unicode">$&</span>'
+
 	tooltipped_words = [];
 	approved_acros = [];
 	#For every acronym that is in the word_acro dicctionary
 	for acronym in Object.keys word_acro_array
-		regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<"=\\\']))', "gim"); 
+		regex_acro = RegExp('(\\b' + acronym + '(?![a-zA-Z<;"=\\\']))', "gim"); 
 		#Hardcoded case for &, change in future. &amp is html encoding for "&"" 
 		#TODO, remove this
-		if acronym == "&"
+		if acronym == "&amp;"
 			regex_acro = RegExp('(' + acronym + ')', "gim");
 		#If the acronym is in the text
 		if regex_acro.test(text_content)
@@ -21,7 +20,7 @@ highlight_word_acro_pairs = (text_content,word_acro_array) ->
 			#For every possible interpretation of an acronym. i.e. 
 			#Interpretation for "msn" is ["mission", "missions"]
 			for spelled_word in word_acro_array[acronym]
-				regex_spelled = RegExp('(\\b' + spelled_word + '(?![a-zA-Z<"=\\\']))', "gim"); #Passes true if the spelled out word is ALSO in the text_content.
+				regex_spelled = RegExp('(\\b' + spelled_word + '(?![a-zA-Z<;"=\\\']))', "gim"); #Passes true if the spelled out word is ALSO in the text_content.
 
 				#Passes true if the spelled out word is ALSO in the text_content.
 				#This if statement will only be true if both the acronym AND the 
@@ -88,17 +87,20 @@ double_dash_check = (text_content) ->
 
 #Semi-colon must have exactly 1 space after it
 semi_colon_space_check = (text_content) ->
-	regex_exclam = ///;(?!(\ \S)|\ {0,}$)///gm
+	regex_exclam = ///;(?!(\ \S)|\ {0,}$|<)///gm
 	text_content = text_content.replace(regex_exclam,'<span class="invalid_semi_colon">$&</span>')
 	return text_content
 
 queep = ->
-	text_content = $('#output').text()
+	text_content = he.escape($('#output').text())
+
 	result = highlight_word_acro_pairs(text_content,word_acro_data)
 
 	text_content = result['html']
 	text_content = exclamation_check(text_content)
 	text_content = double_dash_check(text_content)
+	esc = RegExp('&[a-z]{2,4};(?!<)', "gim");
+	text_content = text_content.replace esc, '<span class="html_entity">$&</span>'
 	text_content = semi_colon_space_check(text_content)
 	result['html'] = text_content
 	return result # returning: {'html': text_content, 'tooltipped_words':[], 'approved_acros':[]}
@@ -125,3 +127,6 @@ $ ->
 		return
 
 
+custom_encoder = (text_content) ->
+	special_chars = ['<', '>', '&', '\''];
+	enc = RegExp('(\\b' + acronym + '(?![a-zA-Z<;"=\\\']))', "gim"); 
