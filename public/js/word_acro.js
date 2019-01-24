@@ -278,6 +278,8 @@ var word_acro_data = {
     "pgm": ["program", "programs"],
     "pgms": ["program", "programs"],
     "phys": ["physical"],
+    "plt": ["pilot", "pilots"],
+    "plts":["pilots", "pilot"],
     "pkg": ["package", "packages"],
     "pkgs": ["packages", "package"],
     "pln": ["plan"],
