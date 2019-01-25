@@ -161,6 +161,7 @@ var word_acro_data = {
     "fld": ["field"],
     "flt": ["flight", "flights"],
     "flts": ["flights", "flight"],
+    "f/"  : ["for"],
     "fraud": ["fraudulent"],
     "freq": ["frequent"],
     "fri": ["friday"],
