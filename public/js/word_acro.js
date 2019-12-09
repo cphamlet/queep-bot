@@ -15,7 +15,7 @@ var word_acro_data = {
     "10th":["tenth"],
     "a/c": ["aircraft"],
     "ab": ["air base"],
-    "acad": ["academy"],
+    "acad": ["academic"],
     "accom": ["accommodate", "accomodation", "accompanied", "accompany"],
     "accomp": ["accomplish"],
     "acct": ["account"],
