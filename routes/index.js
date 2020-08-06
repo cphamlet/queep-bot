@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
 router.get('/contactus', function(req,res){
     res.render('pages/contactus');
 });
-
+/*
 router.post('/contact', function(req, res) {
  let status = sendMail(req, function(status){
     if(status==202){
@@ -20,7 +20,7 @@ router.post('/contact', function(req, res) {
  });
   
 });
-
+*/
 function sendMail(req, callback){
     let [name, replyTo, mailtext] = [req.body.name, req.body.replyTo, req.body.mailtext];
     let request = sg.emptyRequest({
